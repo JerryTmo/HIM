@@ -33,6 +33,10 @@ public enum ResultCode {
 
     // 權限相關
     ROLE_NOT_FOUND(3001, "沒有當前角色"),
+    PERMISSION_DENIED(3002, "权限不足"),
+    ROLE_EXISTS(3003, "角色已存在"),
+    PERMISSION_EXISTS(3004, "权限已存在"),
+    CANNOT_DELETE_SYSTEM_ROLE(3005, "无法删除系统角色"),
 
     // 相冊相關
     ALBUM_NAME_EXISTS(3010, "相冊已存在");

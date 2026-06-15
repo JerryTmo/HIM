@@ -3,7 +3,9 @@ package com.example.controller;
 import com.example.App;
 import com.example.menu.AppPage;
 import com.example.model.Patient;
+import com.example.service.MedicalApiService;
 import com.example.util.DialogManager;
+import com.example.util.UserSession;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -44,15 +46,41 @@ public class PatientManagementController {
     @FXML
     private TextField addressField;
 
+    @FXML
+    private Button addButton;
+    @FXML
+    private Button updateButton;
+    @FXML
+    private Button deleteButton;
+
     private ObservableList<Patient> patientList;
     private DialogManager dialogManager;
+    private MedicalApiService medicalApiService;
 
     @FXML
     public void initialize() {
         dialogManager = DialogManager.getInstance();
+        medicalApiService = MedicalApiService.getInstance();
         initializeTable();
         initializeGenderComboBox();
-        loadSampleData();
+        applyPermissionControl();
+        loadPatientsFromServer();
+    }
+
+    private void applyPermissionControl() {
+        // 检查权限并控制按钮的可见性和可用性
+        boolean canCreate = UserSession.hasPermission("patient:create");
+        boolean canUpdate = UserSession.hasPermission("patient:update");
+        boolean canDelete = UserSession.hasPermission("patient:delete");
+        boolean canRead = UserSession.hasPermission("patient:read");
+
+        // 设置按钮状态
+        addButton.setVisible(canCreate);
+        updateButton.setVisible(canUpdate);
+        deleteButton.setVisible(canDelete);
+
+        // 如果没有读取权限，可以禁用表格或整个界面
+        patientTable.setDisable(!canRead);
     }
 
     private void initializeTable() {
@@ -71,17 +99,29 @@ public class PatientManagementController {
         genderComboBox.setItems(FXCollections.observableArrayList("男", "女"));
     }
 
-    private void loadSampleData() {
-        patientList.add(new Patient("P001", "张三", "男", 35, "13800138000"));
-        patientList.add(new Patient("P002", "李四", "女", 28, "13800138001"));
-        patientList.add(new Patient("P003", "王五", "男", 45, "13800138002"));
+    private void loadPatientsFromServer() {
+        medicalApiService.getAllPatients(
+                patients -> {
+                    patientList.clear();
+                    patientList.addAll(patients);
+                },
+                error -> {
+                    log.error("加载患者列表失败", error);
+                    dialogManager.showError(500, "加载患者列表失败：" + error.getMessage());
+                }
+        );
     }
 
     @FXML
     private void handleAddPatient() {
+        // 双重检查权限
+        if (!UserSession.hasPermission("patient:create")) {
+            dialogManager.showError(403, "您没有创建患者的权限");
+            return;
+        }
+
         try {
             Patient patient = new Patient();
-            patient.setId("P" + String.format("%03d", patientList.size() + 1));
             patient.setName(nameField.getText());
             patient.setPhone(phoneField.getText());
             patient.setGender(genderComboBox.getValue());
@@ -89,9 +129,18 @@ public class PatientManagementController {
             patient.setIdCard(idCardField.getText());
             patient.setAddress(addressField.getText());
 
-            patientList.add(patient);
-            clearForm();
-            dialogManager.showInfo("患者信息添加成功！");
+            medicalApiService.createPatient(patient,
+                    id -> {
+                        patient.setId(id);
+                        patientList.add(patient);
+                        clearForm();
+                        dialogManager.showInfo("患者信息添加成功！");
+                    },
+                    error -> {
+                        log.error("添加患者失败", error);
+                        dialogManager.showError(500, "添加失败：" + error.getMessage());
+                    }
+            );
         } catch (Exception e) {
             dialogManager.showError(500, "添加失败：" + e.getMessage());
         }
@@ -99,6 +148,12 @@ public class PatientManagementController {
 
     @FXML
     private void handleUpdatePatient() {
+        // 双重检查权限
+        if (!UserSession.hasPermission("patient:update")) {
+            dialogManager.showError(403, "您没有修改患者的权限");
+            return;
+        }
+
         Patient selectedPatient = patientTable.getSelectionModel().getSelectedItem();
         if (selectedPatient == null) {
             dialogManager.showWarning("请先选择要修改的患者");
@@ -112,12 +167,26 @@ public class PatientManagementController {
         selectedPatient.setIdCard(idCardField.getText());
         selectedPatient.setAddress(addressField.getText());
 
-        patientTable.refresh();
-        dialogManager.showInfo("患者信息修改成功！");
+        medicalApiService.updatePatient(selectedPatient,
+                _void -> {
+                    patientTable.refresh();
+                    dialogManager.showInfo("患者信息修改成功！");
+                },
+                error -> {
+                    log.error("更新患者失败", error);
+                    dialogManager.showError(500, "更新失败：" + error.getMessage());
+                }
+        );
     }
 
     @FXML
     private void handleDeletePatient() {
+        // 双重检查权限
+        if (!UserSession.hasPermission("patient:delete")) {
+            dialogManager.showError(403, "您没有删除患者的权限");
+            return;
+        }
+
         Patient selectedPatient = patientTable.getSelectionModel().getSelectedItem();
         if (selectedPatient == null) {
             dialogManager.showWarning("请先选择要删除的患者");
@@ -125,9 +194,17 @@ public class PatientManagementController {
         }
 
         if (dialogManager.showConfirm("确认", "确定要删除该患者吗？")) {
-            patientList.remove(selectedPatient);
-            clearForm();
-            dialogManager.showInfo("患者删除成功！");
+            medicalApiService.deletePatient(selectedPatient.getId(),
+                    _void -> {
+                        patientList.remove(selectedPatient);
+                        clearForm();
+                        dialogManager.showInfo("患者删除成功！");
+                    },
+                    error -> {
+                        log.error("删除患者失败", error);
+                        dialogManager.showError(500, "删除失败：" + error.getMessage());
+                    }
+            );
         }
     }
 

@@ -101,4 +101,12 @@ public class ApiClientConfig {
             insClient = null;
         }
     }
+
+    /**
+     * 获取 API 基础 URL
+     */
+    public static String getBaseUrl() {
+        return props.getProperty("api.base.path." + activeProfile,
+                "http://localhost:8080");
+    }
 }

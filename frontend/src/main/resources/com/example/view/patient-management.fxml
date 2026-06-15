@@ -44,9 +44,9 @@
                 <Region VBox.vgrow="ALWAYS" />
                 
                 <HBox spacing="10">
-                    <Button text="➕ 添加患者" onAction="#handleAddPatient" style="-fx-background-color: #43a047; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 12 20; -fx-cursor: hand;" HBox.hgrow="ALWAYS" />
-                    <Button text="✏️ 修改" onAction="#handleUpdatePatient" style="-fx-background-color: #fb8c00; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 12 20; -fx-cursor: hand;" HBox.hgrow="ALWAYS" />
-                    <Button text="🗑️ 删除" onAction="#handleDeletePatient" style="-fx-background-color: #e53935; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 12 20; -fx-cursor: hand;" HBox.hgrow="ALWAYS" />
+                    <Button fx:id="addButton" text="➕ 添加患者" onAction="#handleAddPatient" style="-fx-background-color: #43a047; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 12 20; -fx-cursor: hand;" HBox.hgrow="ALWAYS" />
+                    <Button fx:id="updateButton" text="✏️ 修改" onAction="#handleUpdatePatient" style="-fx-background-color: #fb8c00; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 12 20; -fx-cursor: hand;" HBox.hgrow="ALWAYS" />
+                    <Button fx:id="deleteButton" text="🗑️ 删除" onAction="#handleDeletePatient" style="-fx-background-color: #e53935; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 12 20; -fx-cursor: hand;" HBox.hgrow="ALWAYS" />
                 </HBox>
             </VBox>
             

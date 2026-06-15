@@ -8,6 +8,12 @@ module com.example.javafxdemo {
     // Java 标准库模块
     requires java.desktop;
     requires java.sql;
+    requires java.net.http;
+
+    // Jackson JSON 处理模块
+    requires com.fasterxml.jackson.databind;
+    requires com.fasterxml.jackson.datatype.jsr310;
+    requires com.fasterxml.jackson.core;
 
     // 工具类
     requires org.apache.commons.lang3;
@@ -35,4 +41,7 @@ module com.example.javafxdemo {
     opens com.example.view to javafx.fxml;
     opens com.example.model;
     opens io.swagger.client.model;
+    
+    // 打开 Jackson 用于序列化/反序列化
+    opens com.example.service to com.fasterxml.jackson.databind;
 }

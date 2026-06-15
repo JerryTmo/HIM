@@ -1,6 +1,7 @@
 package com.example.service.impl;
 
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -21,7 +22,6 @@ import com.example.repository.MenuRepository;
 import com.example.repository.PermissionRepository;
 import com.example.repository.UserRepository;
 import com.example.service.MenuService;
-import com.example.service.PermissionService;
 
 import io.micrometer.common.util.StringUtils;
 import lombok.AllArgsConstructor;
@@ -38,7 +38,7 @@ public class MenuServiceImpl implements MenuService {
 
     private final UserRepository userRepository;
     private final MenuRepository menuRepository;
-    private final PermissionService permissionService;
+    private final PermissionRepository permissionRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -129,7 +129,7 @@ public class MenuServiceImpl implements MenuService {
         if (StringUtils.isBlank(module)) {
             return;
         }
-        Set<PermissionEntity> permissions = permissionService.getOrCreatePermissions(module);
+        Set<PermissionEntity> permissions = getOrCreatePermissions(module);
 
         permissions.forEach(permission -> {
             savedMenu.getPermissions().add(permission);
@@ -137,6 +137,30 @@ public class MenuServiceImpl implements MenuService {
         });
 
         menuRepository.save(savedMenu);
+    }
+
+    private Set<PermissionEntity> getOrCreatePermissions(String module) {
+        List<PermissionEntity> existingPermissions = permissionRepository.findByModule(module);
+        
+        if (existingPermissions != null && !existingPermissions.isEmpty()) {
+            return new HashSet<>(existingPermissions);
+        }
+
+        // 如果权限不存在，创建基础权限
+        Set<PermissionEntity> newPermissions = new HashSet<>();
+        String[] operations = {"read", "create", "update", "delete"};
+        
+        for (String operation : operations) {
+            PermissionEntity permission = PermissionEntity.builder()
+                    .name(module + " - " + operation)
+                    .code(module + ":" + operation)
+                    .module(module)
+                    .description(module + " module " + operation + " permission")
+                    .build();
+            newPermissions.add(permission);
+        }
+        
+        return new HashSet<>(permissionRepository.saveAll(newPermissions));
     }
 
     private MenuEntity createMenu(MenuRequest menuRequest) {

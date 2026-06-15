@@ -1,87 +1,166 @@
 package com.example.service.impl;
 
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-
+import com.example.entity.PermissionEntity;
+import com.example.entity.RoleEntity;
+import com.example.entity.UserEntity;
+import com.example.repository.UserRepository;
+import com.example.service.PermissionService;
+import com.example.util.UserUtils;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.common.ServiceResult;
-import com.example.dto.request.PermissionRequest.UpdateCodeRequest;
-import com.example.entity.PermissionEntity;
-import com.example.entity.RoleEntity;
-import com.example.enums.PermissionType;
-import com.example.enums.ResultCode;
-import com.example.exception.BusinessException;
-import com.example.factory.PermissionFactory;
-import com.example.repository.PermissionRepository;
-import com.example.repository.RoleRepository;
-import com.example.service.PermissionService;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Collections;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
+@Slf4j
 public class PermissionServiceImpl implements PermissionService {
-    private final PermissionRepository permissionRepository;
-    private final PermissionFactory permissionFactory;
-    private final RoleRepository roleRepository;
 
-    @Transactional
-    public Set<PermissionEntity> getOrCreatePermissions(String module) {
-        return PermissionType.getAll().stream()
-                .map(type -> getOrCreatePermission(module, type))
-                .collect(Collectors.toSet());
-    }
+    private final UserRepository userRepository;
+    private final UserUtils userUtils;
 
-    private PermissionEntity getOrCreatePermission(String module, PermissionType type) {
-        String code = type.generatePermissionCode(module);
-        return permissionRepository.findByCode(code).orElseGet(() -> {
-            PermissionEntity newPermission = permissionFactory.createPermission(module, type);
-            return permissionRepository.save(newPermission);
-        });
-    }
-
-    public List<String> getPermissionCodes(String module) {
-        return PermissionType.getAll().stream()
-                .map(type -> type.generatePermissionCode(module))
-                .collect(Collectors.toList());
+    @Override
+    @Transactional(readOnly = true)
+    public boolean hasPermission(String permissionCode) {
+        Set<String> permissions = getCurrentUserPermissions();
+        return permissions.contains(permissionCode);
     }
 
     @Override
-    public ServiceResult<Integer> updateCode(UpdateCodeRequest updateCodeRequest) {
-        log.info("id:{}", updateCodeRequest.getRoleId());
-        // 檢查角色是否存在
-        RoleEntity roleEntity = roleRepository.findById(updateCodeRequest.getRoleId())
-                .orElseThrow(() -> new BusinessException(ResultCode.ROLE_NOT_FOUND));
-        // 檢查權限是否存在
-        Set<PermissionEntity> permissionEntities = permissionRepository
-                .findAllById(updateCodeRequest.getPermissionIds())
-                .stream().collect(Collectors.toSet());
-        // 驗證所有請求的權限ID都存在
-        if (permissionEntities.size() != updateCodeRequest.getPermissionIds().size()) {
-            Set<String> foundIds = permissionEntities.stream()
-                    .map(PermissionEntity::getId)
-                    .collect(Collectors.toSet());
-            Set<String> notFoundIds = updateCodeRequest.getPermissionIds().stream()
-                    .filter(id -> !foundIds.contains(id))
-                    .collect(Collectors.toSet());
-            log.warn("部分權限不存在: {}", notFoundIds);
-            throw new BusinessException(ResultCode.ROLE_NOT_FOUND, notFoundIds + "");
+    @Transactional(readOnly = true)
+    public boolean hasAnyPermission(String... permissionCodes) {
+        if (permissionCodes == null || permissionCodes.length == 0) {
+            return true;
         }
-        // 更新角色權限（直接替換整個集合）
-        roleEntity.getPermissions().clear(); // 清除現有權限
-        roleEntity.getPermissions().addAll(permissionEntities); // 添加新權限
 
-        // 保存（會自動更新中間表）
-        roleRepository.save(roleEntity);
+        Set<String> userPermissions = getCurrentUserPermissions();
+        for (String permissionCode : permissionCodes) {
+            if (userPermissions.contains(permissionCode)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-        log.info("角色權限更新成功: roleId={}, 權限數量={}",
-                updateCodeRequest.getRoleId(), permissionEntities.size());
-        return ServiceResult.success(permissionEntities.size());
+    @Override
+    @Transactional(readOnly = true)
+    public boolean hasAllPermissions(String... permissionCodes) {
+        if (permissionCodes == null || permissionCodes.length == 0) {
+            return true;
+        }
+
+        Set<String> userPermissions = getCurrentUserPermissions();
+        for (String permissionCode : permissionCodes) {
+            if (!userPermissions.contains(permissionCode)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean hasRole(String roleCode) {
+        Set<String> roles = getCurrentUserRoles();
+        return roles.contains(roleCode);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean hasAnyRole(String... roleCodes) {
+        if (roleCodes == null || roleCodes.length == 0) {
+            return true;
+        }
+
+        Set<String> userRoles = getCurrentUserRoles();
+        for (String roleCode : roleCodes) {
+            if (userRoles.contains(roleCode)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean hasAllRoles(String... roleCodes) {
+        if (roleCodes == null || roleCodes.length == 0) {
+            return true;
+        }
+
+        Set<String> userRoles = getCurrentUserRoles();
+        for (String roleCode : roleCodes) {
+            if (!userRoles.contains(roleCode)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Set<String> getCurrentUserPermissions() {
+        UserEntity user = getCurrentUser();
+        if (user == null) {
+            return Collections.emptySet();
+        }
+
+        return user.getRoles().stream()
+                .filter(Objects::nonNull)
+                .map(RoleEntity::getPermissions)
+                .flatMap(Set::stream)
+                .filter(Objects::nonNull)
+                .map(PermissionEntity::getCode)
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Set<String> getCurrentUserRoles() {
+        UserEntity user = getCurrentUser();
+        if (user == null) {
+            return Collections.emptySet();
+        }
+
+        return user.getRoles().stream()
+                .filter(Objects::nonNull)
+                .map(RoleEntity::getCode)
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public String getCurrentUserId() {
+        UserEntity user = getCurrentUser();
+        return user != null ? user.getId() : null;
+    }
+
+    @Override
+    public String getCurrentUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
+        }
+        return authentication.getName();
+    }
+
+    private UserEntity getCurrentUser() {
+        try {
+            String username = getCurrentUsername();
+            if (username == null) {
+                return null;
+            }
+            return userRepository.findByUsernameWithRoles(username).orElse(null);
+        } catch (Exception e) {
+            log.error("获取当前用户信息失败", e);
+            return null;
+        }
     }
 }

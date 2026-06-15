@@ -11,9 +11,11 @@ import com.example.common.ServiceResult;
 import com.example.dto.request.LoginRequest;
 import com.example.dto.request.RegisterRequest;
 import com.example.dto.response.LoginResponse;
+import com.example.entity.RoleEntity;
 import com.example.entity.UserEntity;
 import com.example.enums.ResultCode;
 import com.example.exception.BusinessException;
+import com.example.repository.RoleRepository;
 import com.example.repository.UserRepository;
 import com.example.service.UserService;
 import com.example.util.JwtUtil;
@@ -21,11 +23,15 @@ import com.example.util.JwtUtil;
 import io.jsonwebtoken.lang.Assert;
 import lombok.RequiredArgsConstructor;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
@@ -65,16 +71,24 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ResultCode.USERNAME_EXISTS);
         }
 
+        // 查询默认角色
+        RoleEntity defaultRole = roleRepository.findByIsDefaultTrue()
+                .orElseThrow(() -> new BusinessException(ResultCode.ERROR, "默认角色不存在"));
+
+        // 设置用户角色
+        Set<RoleEntity> roles = new HashSet<>();
+        roles.add(defaultRole);
+
         UserEntity userEntity = UserEntity.builder()
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .email(request.getEmail())
                 .status(1)
+                .roles(roles)
                 .build();
         Assert.notNull(userEntity, "用戶信息不能為空");
         // 保存用戶
         UserEntity savedUser = userRepository.save(userEntity);
-        // TODO Auto-generated method stub
         return ServiceResult.success(savedUser.getUsername());
     }
 

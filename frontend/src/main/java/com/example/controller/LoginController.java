@@ -11,6 +11,7 @@ import com.example.App;
 import com.example.exception.ApiServiceException;
 import com.example.menu.AppPage;
 import com.example.service.ApiService;
+import com.example.service.SystemApiService;
 import com.example.util.UserSession;
 
 import io.swagger.client.api.DefaultApi;
@@ -82,8 +83,16 @@ public class LoginController implements Initializable {
     private void handleLoginSuccess(ServiceResultLoginResponse result) {
         if (result.getCode() == 200) {
             String token = result.getData().getAccessToken();
-            UserSession.login(token, usernameField.getText());
-            App.navigateTo(AppPage.HOME);
+            UserSession.login(token, usernameField.getText(), null, null, null);
+
+            // 获取用户信息
+            SystemApiService.getInstance().getCurrentUserInfo(
+                    userInfo -> App.navigateTo(AppPage.HOME),
+                    error -> {
+                        // 即使获取用户信息失败也登录成功
+                        App.navigateTo(AppPage.HOME);
+                    }
+            );
         } else {
             showError(result.getMessage() != null ? result.getMessage() : "登录失败");
             passwordField.clear();

@@ -31,6 +31,17 @@ public class ServiceResult<T> {
     }
 
     /**
+     * 成功 - 无数据
+     */
+    public static <T> ServiceResult<T> success() {
+        ServiceResult<T> result = new ServiceResult<>();
+        result.setSuccess(true);
+        result.setCode(ResultCode.SUCCESS.getCode());
+        result.setMessage(ResultCode.SUCCESS.getMessage());
+        return result;
+    }
+
+    /**
      * 成功 - 只有数据
      */
     public static <T> ServiceResult<T> success(T data) {
@@ -51,6 +62,17 @@ public class ServiceResult<T> {
         result.setCode(ResultCode.SUCCESS.getCode());
         result.setMessage(message);
         result.setData(data);
+        return result;
+    }
+
+    /**
+     * 成功 - 只有消息
+     */
+    public static <T> ServiceResult<T> successMessage(String message) {
+        ServiceResult<T> result = new ServiceResult<>();
+        result.setSuccess(true);
+        result.setCode(ResultCode.SUCCESS.getCode());
+        result.setMessage(message);
         return result;
     }
 
