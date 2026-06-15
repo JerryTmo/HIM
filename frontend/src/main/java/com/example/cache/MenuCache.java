@@ -1,6 +1,6 @@
 package com.example.cache;
 
-import io.swagger.client.model.MenuDTO;
+import com.example.service.SystemApiService.MenuDTO;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;

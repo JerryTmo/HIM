@@ -171,6 +171,15 @@ public class SystemApiService {
                 onError);
     }
 
+    // ==================== 菜单管理 ====================
+
+    public void getMenus(Consumer<List<MenuDTO>> onSuccess, Consumer<Throwable> onError) {
+        callAsync("GET", "/api/menu/findByMenu", null,
+                new TypeReference<ServiceResult<List<MenuDTO>>>() {},
+                result -> onSuccess.accept(result.getData()),
+                onError);
+    }
+
     // ==================== 私有方法 ====================
 
     private <T> void callAsync(String method, String path, Object body,
@@ -391,5 +400,32 @@ public class SystemApiService {
         public void setModule(String module) { this.module = module; }
         public String getDescription() { return description; }
         public void setDescription(String description) { this.description = description; }
+    }
+
+    // ==================== 菜单 DTO（與後端 MenuServiceImpl.MenuDTO 對應） ====================
+
+    public static class MenuDTO {
+        private String id;
+        private String title;
+        private String route;
+        private String icon;
+        private Integer sortOrder;
+        private String module;
+        private List<MenuDTO> children;
+
+        public String getId() { return id; }
+        public void setId(String id) { this.id = id; }
+        public String getTitle() { return title; }
+        public void setTitle(String title) { this.title = title; }
+        public String getRoute() { return route; }
+        public void setRoute(String route) { this.route = route; }
+        public String getIcon() { return icon; }
+        public void setIcon(String icon) { this.icon = icon; }
+        public Integer getSortOrder() { return sortOrder; }
+        public void setSortOrder(Integer sortOrder) { this.sortOrder = sortOrder; }
+        public String getModule() { return module; }
+        public void setModule(String module) { this.module = module; }
+        public List<MenuDTO> getChildren() { return children; }
+        public void setChildren(List<MenuDTO> children) { this.children = children; }
     }
 }

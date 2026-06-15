@@ -43,7 +43,7 @@ public class MenuServiceImpl implements MenuService {
     @Override
     @Transactional(readOnly = true)
     public ServiceResult<List<MenuDTO>> findByMenu(String username) {
-        UserEntity userEntity = userRepository.findByUsernameWithRoles(username)
+        UserEntity userEntity = userRepository.findByUsernameWithRolesAndPermissions(username)
                 .orElseThrow(() -> new BusinessException(ResultCode.USER_NOT_FOUND));
         log.info("用戶信息:{}", userEntity);
 

@@ -4,7 +4,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
-import io.swagger.client.model.MenuDTO;
+import com.example.service.SystemApiService.MenuDTO;
 import com.example.controller.HomeController;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,12 +26,14 @@ public class ContentLoaderFactory {
     private final Map<String, Node> contentCache = new HashMap<>();
 
     /**
-     * 加载内容
+     * 加载内容并设置到主内容区域
      */
     public Node loadContent(MenuDTO menu) {
         // 检查缓存
         if (contentCache.containsKey(menu.getId())) {
-            return contentCache.get(menu.getId());
+            Node cached = contentCache.get(menu.getId());
+            setContentToArea(cached);
+            return cached;
         }
 
         // 根据路由加载
@@ -40,9 +42,18 @@ public class ContentLoaderFactory {
         // 缓存内容
         if (content != null) {
             contentCache.put(menu.getId(), content);
+            setContentToArea(content);
         }
 
         return content;
+    }
+
+    /**
+     * 将加载的内容设置到主页面的内容区域
+     */
+    private void setContentToArea(Node content) {
+        controller.getContentArea().getChildren().clear();
+        controller.getContentArea().getChildren().add(content);
     }
 
     /**
@@ -86,11 +97,21 @@ public class ContentLoaderFactory {
      * 加载备用内容
      */
     private Node loadFallbackContent(String route, String title) {
+        if (route.contains("patient"))
+            return createSimpleContent("患者管理", "这里是患者管理页面");
+        if (route.contains("doctor") || route.contains("schedule"))
+            return createSimpleContent("医生排班", "这里是医生排班页面");
+        if (route.contains("medical") || route.contains("record"))
+            return createSimpleContent("病历管理", "这里是病历管理页面");
+        if (route.contains("medicine"))
+            return createSimpleContent("药品管理", "这里是药品管理页面");
+        if (route.contains("appointment"))
+            return createSimpleContent("预约管理", "这里是预约管理页面");
         if (route.contains("dynamic"))
             return createSimpleContent("动态", "这里是动态页面");
-        if (route.contains("album"))
+        if (route.contains("album") || route.contains("photo"))
             return createSimpleContent("相册", "这里是相册页面");
-        if (route.contains("journal"))
+        if (route.contains("journal") || route.contains("log"))
             return createSimpleContent("日志", "这里是日志页面");
         if (route.contains("mindmap"))
             return createSimpleContent("思维导图", "这里是思维导图页面");

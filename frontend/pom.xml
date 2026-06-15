@@ -188,9 +188,15 @@
                         </path>
                     </annotationProcessorPaths>
                     <compilerArgs>
-                        <!-- 对于非模块化的库，通过参数让模块系统允许访问 -->
+                        <!-- 允许模块访问 unnamed 模块 -->
                         <arg>--add-reads</arg>
                         <arg>com.example.javafxdemo=ALL-UNNAMED</arg>
+                        <!-- JavaFX FXML 需要反射访问控制器的包 -->
+                        <arg>--add-opens</arg>
+                        <arg>com.example.javafxdemo/com.example.controller=javafx.fxml</arg>
+                        <!-- Lombok 注解处理需要访问 java.base 内部 -->
+                        <arg>--add-exports</arg>
+                        <arg>java.base/sun.reflect.annotation=ALL-UNNAMED</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>
@@ -213,8 +219,49 @@
                 <configuration>
                     <mainClass>com.example.Launcher</mainClass>
                     <options>
+                        <!-- ===== 模块系统配置 ===== -->
+                        <!-- 允许模块访问 unnamed（classpath）模块 -->
                         <option>--add-reads</option>
                         <option>com.example.javafxdemo=ALL-UNNAMED</option>
+
+                        <!-- ===== FXML 反射访问 ===== -->
+                        <!-- JavaFX FXML 加载器需要通过反射访问控制器和视图 -->
+                        <option>--add-opens</option>
+                        <option>com.example.javafxdemo/com.example.controller=javafx.fxml</option>
+                        <option>--add-opens</option>
+                        <option>com.example.javafxdemo/com.example.model=javafx.fxml</option>
+                        <option>--add-opens</option>
+                        <option>com.example.javafxdemo/com.example.view=javafx.fxml</option>
+                        <option>--add-opens</option>
+                        <option>com.example.javafxdemo/com.example=javafx.fxml</option>
+                        <option>--add-opens</option>
+                        <option>com.example.javafxdemo/com.example.service=javafx.fxml</option>
+                        <option>--add-opens</option>
+                        <option>com.example.javafxdemo/com.example.factory=javafx.fxml</option>
+                        <option>--add-opens</option>
+                        <option>com.example.javafxdemo/com.example.menu=javafx.fxml</option>
+
+                        <!-- ===== Jackson JSON 反射访问 ===== -->
+                        <option>--add-opens</option>
+                        <option>com.example.javafxdemo/com.example.service=com.fasterxml.jackson.databind</option>
+                        <option>--add-opens</option>
+                        <option>com.example.javafxdemo/com.example.model=com.fasterxml.jackson.databind</option>
+                        <option>--add-opens</option>
+                        <option>com.example.javafxdemo/com.example.menu=com.fasterxml.jackson.databind</option>
+                        <option>--add-opens</option>
+                        <option>com.example.javafxdemo/io.swagger.client.model=com.fasterxml.jackson.databind</option>
+                        <option>--add-opens</option>
+                        <option>com.example.javafxdemo/io.swagger.client.model=com.google.gson</option>
+
+                        <!-- ===== java.base 内部模块反射（某些库需要） ===== -->
+                        <option>--add-opens</option>
+                        <option>java.base/java.lang=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>java.base/java.util=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>java.base/java.io=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>java.base/java.lang.reflect=ALL-UNNAMED</option>
                     </options>
                 </configuration>
                 <executions>

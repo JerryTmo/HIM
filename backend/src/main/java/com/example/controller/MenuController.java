@@ -12,6 +12,7 @@ import com.example.common.ServiceResult;
 import com.example.dto.request.MenuRequest;
 import com.example.service.MenuService;
 import com.example.service.impl.MenuServiceImpl.MenuDTO;
+import com.example.util.UserUtils;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,11 +26,13 @@ import lombok.RequiredArgsConstructor;
 public class MenuController {
 
     private final MenuService menuService;
+    private final UserUtils userUtils;
 
     @GetMapping("/findByMenu")
-    @Operation(summary = "查詢菜單")
+    @Operation(summary = "查詢當前用戶菜單")
     public ServiceResult<List<MenuDTO>> findByMenu() {
-        return menuService.findByMenu("admin");
+        String username = userUtils.getUserDetails().getUsername();
+        return menuService.findByMenu(username);
     }
 
     @PostMapping("/insertMenus")

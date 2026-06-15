@@ -1,8 +1,10 @@
 package com.example.config;
 
+import com.example.entity.MenuEntity;
 import com.example.entity.PermissionEntity;
 import com.example.entity.RoleEntity;
 import com.example.entity.UserEntity;
+import com.example.repository.MenuRepository;
 import com.example.repository.PermissionRepository;
 import com.example.repository.RoleRepository;
 import com.example.repository.UserRepository;
@@ -25,6 +27,7 @@ public class DataInitializer implements CommandLineRunner {
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
     private final UserRepository userRepository;
+    private final MenuRepository menuRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -34,6 +37,7 @@ public class DataInitializer implements CommandLineRunner {
         initializeRoles();
         initializeAdminUser();
         assignPermissionsToRoles();
+        initializeMenus();
     }
 
     private void initializePermissions() {
@@ -197,6 +201,81 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
 
+    /**
+     * 初始化菜单数据
+     * 关联到已有权限模块，按角色权限动态展示
+     */
+    private void initializeMenus() {
+        if (menuRepository.count() > 0) {
+            log.info("菜单数据已存在，跳过初始化");
+            return;
+        }
+
+        // 1. 创建一级分类菜单（无 route，作为分组标题）
+        MenuEntity patientMgmt = createMenu("患者管理", null, "🏥", 1, "患者管理", null);
+        MenuEntity doctorMgmt = createMenu("医生管理", null, "👨‍⚕️", 2, "医生管理", null);
+        MenuEntity appointmentMgmt = createMenu("预约管理", null, "📅", 3, "预约管理", null);
+        MenuEntity medicalMgmt = createMenu("病历管理", null, "📝", 4, "病历管理", null);
+        MenuEntity medicineMgmt = createMenu("药品管理", null, "💊", 5, "药品管理", null);
+
+        menuRepository.saveAll(List.of(patientMgmt, doctorMgmt, appointmentMgmt, medicalMgmt, medicineMgmt));
+
+        // 2. 创建二级子菜单（有 route，指向 FXML 文件）
+        MenuEntity patientList = createMenu("患者列表", "patient-management", "👥", 1, "患者管理", patientMgmt);
+        MenuEntity patientAdd = createMenu("添加患者", "patient-management", "➕", 2, "患者管理", patientMgmt);
+
+        MenuEntity doctorList = createMenu("医生排班", "doctor-schedule", "📋", 1, "医生管理", doctorMgmt);
+
+        MenuEntity appointmentList = createMenu("预约列表", "appointment-management", "📋", 1, "预约管理", appointmentMgmt);
+        MenuEntity appointmentAdd = createMenu("新建预约", "appointment-management", "➕", 2, "预约管理", appointmentMgmt);
+
+        MenuEntity medicalRecordList = createMenu("病历列表", "medical-record", "📋", 1, "病历管理", medicalMgmt);
+        MenuEntity medicalRecordAdd = createMenu("新建病历", "medical-record", "➕", 2, "病历管理", medicalMgmt);
+
+        MenuEntity medicineList = createMenu("药品列表", "medicine-management", "📋", 1, "药品管理", medicineMgmt);
+
+        menuRepository.saveAll(List.of(
+                patientList, patientAdd,
+                doctorList,
+                appointmentList, appointmentAdd,
+                medicalRecordList, medicalRecordAdd,
+                medicineList
+        ));
+
+        // 3. 关联菜单到对应模块的权限
+        associateMenuWithPermissions(patientMgmt, "患者管理");
+        associateMenuWithPermissions(patientList, "患者管理");
+        associateMenuWithPermissions(patientAdd, "患者管理");
+
+        associateMenuWithPermissions(doctorMgmt, "医生管理");
+        associateMenuWithPermissions(doctorList, "医生管理");
+
+        associateMenuWithPermissions(appointmentMgmt, "预约管理");
+        associateMenuWithPermissions(appointmentList, "预约管理");
+        associateMenuWithPermissions(appointmentAdd, "预约管理");
+
+        associateMenuWithPermissions(medicalMgmt, "病历管理");
+        associateMenuWithPermissions(medicalRecordList, "病历管理");
+        associateMenuWithPermissions(medicalRecordAdd, "病历管理");
+
+        associateMenuWithPermissions(medicineMgmt, "药品管理");
+        associateMenuWithPermissions(medicineList, "药品管理");
+
+        log.info("初始化菜单数据成功");
+    }
+
+    /**
+     * 将菜单关联到指定模块的所有权限
+     */
+    private void associateMenuWithPermissions(MenuEntity menu, String module) {
+        List<PermissionEntity> permissions = permissionRepository.findByModule(module);
+        for (PermissionEntity permission : permissions) {
+            menu.getPermissions().add(permission);
+            permission.getMenus().add(menu);
+        }
+        menuRepository.save(menu);
+    }
+
     private PermissionEntity createPermission(String name, String code, String module, String description) {
         return PermissionEntity.builder()
                 .name(name)
@@ -212,6 +291,19 @@ public class DataInitializer implements CommandLineRunner {
                 .code(code)
                 .description(description)
                 .isDefault(isDefault)
+                .build();
+    }
+
+    private MenuEntity createMenu(String title, String route, String icon,
+                                   Integer sortOrder, String module, MenuEntity parent) {
+        return MenuEntity.builder()
+                .title(title)
+                .route(route)
+                .icon(icon)
+                .sortOrder(sortOrder)
+                .isActive(true)
+                .module(module)
+                .parent(parent)
                 .build();
     }
 }
