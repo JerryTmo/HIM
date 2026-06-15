@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.controller.QuickGenerateController"
+            style="-fx-background-color: linear-gradient(to bottom right, #667eea, #764ba2);">
+
+    <VBox spacing="0" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+          AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+        
+        <!-- 顶部标题栏 -->
+        <HBox alignment="CENTER_LEFT" spacing="15"
+              style="-fx-background-color: rgba(255,255,255,0.95); -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+            <padding>
+                <Insets top="15" right="25" bottom="15" left="25"/>
+            </padding>
+            
+            <Label text="🧠" style="-fx-font-size: 28px;"/>
+            <Label text="AI思维导图生成器" 
+                   style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2d3436;"/>
+            
+            <Region HBox.hgrow="ALWAYS"/>
+            
+            <Button fx:id="showHistoryBtn" text="📋 历史记录" onAction="#showHistory"
+                    style="-fx-background-color: #6c5ce7; -fx-text-fill: white; -fx-background-radius: 20; -fx-cursor: hand; -fx-padding: 8 15;"/>
+        </HBox>
+
+        <!-- 主内容区 -->
+        <VBox spacing="20" VBox.vgrow="ALWAYS" alignment="TOP_CENTER">
+            <padding>
+                <Insets top="40" right="40" bottom="40" left="40"/>
+            </padding>
+            
+            <!-- 输入方式切换 -->
+            <HBox spacing="15" alignment="CENTER">
+                <ToggleButton fx:id="textModeBtn" text="✏️ 文字输入" selected="true"
+                              style="-fx-background-radius: 25; -fx-padding: 10 25; -fx-cursor: hand; -fx-font-size: 14px;"
+                              styleClass="mode-button"/>
+                <ToggleButton fx:id="voiceModeBtn" text="🎤 语音输入"
+                              style="-fx-background-radius: 25; -fx-padding: 10 25; -fx-cursor: hand; -fx-font-size: 14px;"
+                              styleClass="mode-button"/>
+            </HBox>
+            
+            <!-- 文字输入区域 -->
+            <VBox fx:id="textInputSection" spacing="15" VBox.vgrow="ALWAYS" maxWidth="800">
+                <Label text="📝 输入内容或主题" style="-fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 16px;"/>
+                
+                <TextArea fx:id="inputTextArea" 
+                          promptText="输入文字内容，AI将自动提取关键信息生成思维导图...&#10;&#10;例如：&#10;人工智能包含机器学习、深度学习、自然语言处理等分支。&#10;机器学习包括监督学习、无监督学习和强化学习。&#10;深度学习包括CNN、RNN、Transformer等架构。"
+                          wrapText="true" VBox.vgrow="ALWAYS" prefRowCount="8"
+                          style="-fx-background-color: rgba(255,255,255,0.95); -fx-border-color: transparent; -fx-border-radius: 15; -fx-background-radius: 15; -fx-font-size: 14px; -fx-padding: 15;"/>
+                
+                <!-- 生成选项 -->
+                <HBox spacing="15" alignment="CENTER_LEFT">
+                    <Label text="布局:" style="-fx-text-fill: white; -fx-font-size: 14px;"/>
+                    <ChoiceBox fx:id="layoutChoiceBox" prefWidth="120"
+                               style="-fx-background-color: rgba(255,255,255,0.9); -fx-background-radius: 20;">
+                    </ChoiceBox>
+                    
+                    <Label text="颜色主题:" style="-fx-text-fill: white; -fx-font-size: 14px;"/>
+                    <ChoiceBox fx:id="themeChoiceBox" prefWidth="120"
+                               style="-fx-background-color: rgba(255,255,255,0.9); -fx-background-radius: 20;">
+                    </ChoiceBox>
+                </HBox>
+                
+                <HBox spacing="15" alignment="CENTER">
+                    <Button fx:id="generateBtn" text="🚀 AI生成思维导图" onAction="#generateMindMap"
+                            style="-fx-background-color: #00b894; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px; -fx-background-radius: 30; -fx-cursor: hand; -fx-padding: 12 35; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 5);"/>
+                    
+                    <Button fx:id="clearInputBtn" text="🗑️ 清空" onAction="#clearInput"
+                            style="-fx-background-color: rgba(255,255,255,0.3); -fx-text-fill: white; -fx-background-radius: 30; -fx-cursor: hand; -fx-padding: 12 25;"/>
+                </HBox>
+            </VBox>
+            
+            <!-- 语音输入区域 -->
+            <VBox fx:id="voiceInputSection" spacing="15" alignment="CENTER" visible="false" managed="false" VBox.vgrow="ALWAYS">
+                <Label text="🎙️ 语音输入" style="-fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 18px;"/>
+                
+                <Button fx:id="voiceRecordBtn" text="点击开始录音" onAction="#toggleVoiceRecord"
+                        style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px; -fx-background-radius: 50; -fx-cursor: hand; -fx-padding: 20 40; -fx-min-width: 200; -fx-min-height: 200; -fx-shape: 'M100,100';"/>
+                
+                <Label fx:id="voiceStatusLabel" text="点击按钮开始录音" 
+                       style="-fx-text-fill: rgba(255,255,255,0.8); -fx-font-size: 14px;"/>
+                
+                <TextArea fx:id="recognizedText" 
+                          promptText="识别结果将显示在这里..."
+                          wrapText="true" prefRowCount="4" editable="false"
+                          style="-fx-background-color: rgba(255,255,255,0.95); -fx-border-color: transparent; -fx-border-radius: 15; -fx-background-radius: 15; -fx-font-size: 14px; -fx-padding: 15;"/>
+            </VBox>
+            
+            <!-- AI处理状态 -->
+            <HBox fx:id="aiStatusBox" spacing="15" alignment="CENTER" visible="false" managed="false"
+                  style="-fx-background-color: rgba(255,255,255,0.95); -fx-background-radius: 15; -fx-padding: 15 25;">
+                <ProgressIndicator fx:id="aiProgress" prefWidth="30" prefHeight="30"/>
+                <Label fx:id="aiStatusLabel" text="AI正在分析内容..." 
+                       style="-fx-text-fill: #2d3436; -fx-font-size: 14px; -fx-font-weight: bold;"/>
+            </HBox>
+        </VBox>
+        
+        <!-- 底部状态栏 -->
+        <HBox spacing="15" alignment="CENTER_LEFT"
+              style="-fx-background-color: rgba(255,255,255,0.9); -fx-padding: 10 25;">
+            <Label text="✅ 就绪" fx:id="statusLabel" style="-fx-text-fill: #636e72; -fx-font-size: 12px;"/>
+            <Separator orientation="VERTICAL"/>
+            <Label text="AI: DeepSeek" style="-fx-text-fill: #636e72; -fx-font-size: 12px;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="💡 点击生成后将在新窗口显示思维导图" style="-fx-text-fill: #b2bec3; -fx-font-size: 11px;"/>
+        </HBox>
+    </VBox>
+</AnchorPane>

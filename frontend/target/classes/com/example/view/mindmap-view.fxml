@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.canvas.Canvas?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.controller.MindMapViewerController"
+            style="-fx-background-color: #f8f9fa;">
+
+    <VBox spacing="0" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+          AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+        
+        <!-- 顶部工具栏 -->
+        <HBox alignment="CENTER_LEFT" spacing="10"
+              style="-fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 3);">
+            <padding>
+                <Insets top="10" right="20" bottom="10" left="20"/>
+            </padding>
+            
+            <Label text="🧠" style="-fx-font-size: 20px;"/>
+            <Label fx:id="mapTitleLabel" text="思维导图" 
+                   style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2d3436;"/>
+            
+            <Separator orientation="VERTICAL" prefHeight="25"/>
+            
+            <!-- 布局切换 -->
+            <Button fx:id="treeLayoutBtn" text="🌳 树形" onAction="#switchToTreeLayout"
+                    styleClass="tool-btn"/>
+            <Button fx:id="radialLayoutBtn" text="☀️ 辐射" onAction="#switchToRadialLayout"
+                    styleClass="tool-btn"/>
+            <Button fx:id="orgLayoutBtn" text="🏢 组织" onAction="#switchToOrgLayout"
+                    styleClass="tool-btn"/>
+            
+            <Separator orientation="VERTICAL" prefHeight="25"/>
+            
+            <!-- 主题切换 -->
+            <ColorPicker fx:id="colorPicker" prefWidth="30" prefHeight="25"
+                         style="-fx-background-radius: 15;"/>
+            
+            <Region HBox.hgrow="ALWAYS"/>
+            
+            <!-- 操作按钮 -->
+            <Button text="🔄 刷新" onAction="#refreshView"
+                    styleClass="tool-btn"/>
+            <Button fx:id="exportBtn" text="📥 导出PNG" onAction="#exportAsImage"
+                    styleClass="tool-btn"/>
+            <Button fx:id="exportPDFBtn" text="📄 导出PDF" onAction="#exportAsPDF"
+                    styleClass="tool-btn"/>
+            <Button fx:id="shareBtn" text="🔗 分享" onAction="#shareMindMap"
+                    styleClass="tool-btn"/>
+        </HBox>
+        
+        <!-- 思维导图显示区域 -->
+        <AnchorPane fx:id="mindMapPane" VBox.vgrow="ALWAYS"
+                    style="-fx-background-color: white;">
+            
+            <Canvas fx:id="mindMapCanvas" 
+                    AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+                    AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
+            
+            <!-- 浮动控制面板 -->
+            <VBox spacing="8" AnchorPane.bottomAnchor="20" AnchorPane.rightAnchor="20"
+                  style="-fx-background-color: rgba(255,255,255,0.95); -fx-background-radius: 15; -fx-padding: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 3);">
+                
+                <Button text="➕" onAction="#zoomIn"
+                        style="-fx-background-color: transparent; -fx-cursor: hand; -fx-font-size: 18px; -fx-padding: 5 12;"/>
+                <Separator/>
+                <Label fx:id="zoomLevelLabel" text="100%" 
+                       style="-fx-font-size: 12px; -fx-text-fill: #636e72; -fx-alignment: center; -fx-min-width: 50;"/>
+                <Separator/>
+                <Button text="➖" onAction="#zoomOut"
+                        style="-fx-background-color: transparent; -fx-cursor: hand; -fx-font-size: 18px; -fx-padding: 5 12;"/>
+                <Button text="↺" onAction="#resetView"
+                        style="-fx-background-color: transparent; -fx-cursor: hand; -fx-font-size: 18px; -fx-padding: 5 12;"/>
+                <Button text="⊞" onAction="#fitToScreen"
+                        style="-fx-background-color: transparent; -fx-cursor: hand; -fx-font-size: 18px; -fx-padding: 5 12;"/>
+            </VBox>
+            
+            <!-- 图例 -->
+            <HBox spacing="15" AnchorPane.bottomAnchor="20" AnchorPane.leftAnchor="20"
+                  style="-fx-background-color: rgba(255,255,255,0.9); -fx-background-radius: 10; -fx-padding: 10 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);">
+                <HBox spacing="5" alignment="CENTER">
+                    <Region style="-fx-background-color: #6c5ce7; -fx-min-width: 12; -fx-min-height: 12; -fx-background-radius: 3;"/>
+                    <Label text="核心" style="-fx-font-size: 11px; -fx-text-fill: #636e72;"/>
+                </HBox>
+                <HBox spacing="5" alignment="CENTER">
+                    <Region style="-fx-background-color: #00b894; -fx-min-width: 12; -fx-min-height: 12; -fx-background-radius: 3;"/>
+                    <Label text="一级" style="-fx-font-size: 11px; -fx-text-fill: #636e72;"/>
+                </HBox>
+                <HBox spacing="5" alignment="CENTER">
+                    <Region style="-fx-background-color: #fd79a8; -fx-min-width: 12; -fx-min-height: 12; -fx-background-radius: 3;"/>
+                    <Label text="二级" style="-fx-font-size: 11px; -fx-text-fill: #636e72;"/>
+                </HBox>
+            </HBox>
+        </AnchorPane>
+        
+        <!-- 底部状态栏 -->
+        <HBox spacing="15" alignment="CENTER_LEFT"
+              style="-fx-background-color: white; -fx-padding: 8 20; -fx-border-color: #f1f2f6; -fx-border-width: 1 0 0 0;">
+            <Label fx:id="nodeCountLabel" text="节点: 0" style="-fx-text-fill: #636e72; -fx-font-size: 12px;"/>
+            <Separator orientation="VERTICAL"/>
+            <Label text="💡 滚轮缩放 | 拖拽平移 | 双击节点编辑" style="-fx-text-fill: #b2bec3; -fx-font-size: 11px;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="lastModifiedLabel" text="" style="-fx-text-fill: #b2bec3; -fx-font-size: 11px;"/>
+        </HBox>
+    </VBox>
+</AnchorPane>

@@ -1,0 +1,6 @@
+[INFO] Processing build on daemon 4cd81e86
+[INFO] Scanning for projects...
+[INFO] BuildTimeEventSpy is registered.
+[INFO] Artifact org.apache.maven.plugins:maven-deploy-plugin:pom:3.1.2 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-public (https://maven.aliyun.com/repository/public, default, releases)]
+[INFO] Artifact org.apache.maven.plugins:maven-deploy-plugin:pom:3.1.2 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [aliyun-public (https://maven.aliyun.com/repository/public, default, releases)]
+[INFO] Downloading from aliyun-public: https://maven.aliyun.com/repository/public/org/apache/maven/plugins/maven-deploy-plugin/3.1.2/maven-deploy-plugin-3.1.2.pom

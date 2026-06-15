@@ -1,0 +1,30 @@
+/* 主視窗按鈕樣式 */
+.mode-button:selected {
+  -fx-background-color: white;
+  -fx-text-fill: #6c5ce7;
+  -fx-font-weight: bold;
+}
+
+.mode-button {
+  -fx-background-color: rgba(255, 255, 255, 0.3);
+  -fx-text-fill: white;
+}
+
+/* 顯示視窗工具按鈕 */
+.tool-btn {
+  -fx-background-color: transparent;
+  -fx-text-fill: #636e72;
+  -fx-background-radius: 8;
+  -fx-cursor: hand;
+  -fx-padding: 6 12;
+}
+
+.tool-btn:hover {
+  -fx-background-color: #f1f2f6;
+  -fx-text-fill: #2d3436;
+}
+
+/* Canvas樣式 */
+.canvas {
+  -fx-background-color: #f8f9fa;
+}

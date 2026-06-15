@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
+
+<AnchorPane prefWidth="1050" prefHeight="750" 
+            xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.controller.LogController"
+            style="-fx-background-color: linear-gradient(to bottom right, #f8fafc, #e2e8f0);">
+
+    <VBox spacing="12" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+          AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+        <padding>
+            <Insets top="20" right="20" bottom="20" left="20"/>
+        </padding>
+
+        <!-- 標題欄 -->
+        <HBox alignment="CENTER_LEFT" spacing="10"
+              style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);">
+            <Label text="📝 日誌記錄器" 
+                   style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="currentTimeLabel" 
+                   style="-fx-text-fill: #64748b; -fx-font-size: 13px;"/>
+        </HBox>
+
+        <!-- 主要兩欄佈局 -->
+        <SplitPane dividerPositions="0.42" VBox.vgrow="ALWAYS" 
+                   style="-fx-background-color: transparent; -fx-padding: 5 0 0 0;">
+            
+            <!-- 左側：日誌寫入表單 -->
+            <VBox spacing="12" 
+                  style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 18; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 3);">
+                
+                <Label text="✏️ 編寫新日誌" 
+                       style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #334155;"/>
+                
+                <!-- 日誌級別 -->
+                <VBox spacing="6">
+                    <Label text="日誌級別" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                    <HBox spacing="12">
+                        <fx:define>
+                            <ToggleGroup fx:id="levelGroup"/>
+                        </fx:define>
+                        <RadioButton fx:id="infoRadio" text="📘 INFO" toggleGroup="$levelGroup" selected="true"
+                                     style="-fx-text-fill: #2563eb; -fx-font-weight: bold;"/>
+                        <RadioButton fx:id="warningRadio" text="⚠️ WARNING" toggleGroup="$levelGroup"
+                                     style="-fx-text-fill: #d97706; -fx-font-weight: bold;"/>
+                        <RadioButton fx:id="errorRadio" text="❌ ERROR" toggleGroup="$levelGroup"
+                                     style="-fx-text-fill: #dc2626; -fx-font-weight: bold;"/>
+                        <RadioButton fx:id="debugRadio" text="🔧 DEBUG" toggleGroup="$levelGroup"
+                                     style="-fx-font-weight: bold;"/>
+                    </HBox>
+                </VBox>
+                
+                <!-- 日誌分類 -->
+                <VBox spacing="6">
+                    <Label text="分類標籤" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                    <ComboBox fx:id="categoryCombo" promptText="選擇或輸入分類" editable="true"
+                              style="-fx-background-color: #f8fafc; -fx-border-color: #cbd5e1; -fx-border-radius: 8; -fx-background-radius: 8;">
+                        <items>
+                            <FXCollections fx:factory="observableArrayList">
+                                <String fx:value="系統"/>
+                                <String fx:value="業務"/>
+                                <String fx:value="用戶操作"/>
+                                <String fx:value="資料庫"/>
+                                <String fx:value="網路"/>
+                                <String fx:value="安全"/>
+                            </FXCollections>
+                        </items>
+                    </ComboBox>
+                </VBox>
+                
+                <!-- 日誌標題 -->
+                <VBox spacing="6">
+                    <Label text="日誌標題" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                    <TextField fx:id="titleField" promptText="輸入日誌標題..."
+                               style="-fx-background-color: #f8fafc; -fx-border-color: #cbd5e1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10;"/>
+                </VBox>
+                
+                <!-- 日誌內容 -->
+                <VBox spacing="6" VBox.vgrow="ALWAYS">
+                    <Label text="日誌內容" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                    <TextArea fx:id="contentArea" promptText="詳細描述日誌內容..." 
+                              wrapText="true" VBox.vgrow="ALWAYS"
+                              style="-fx-background-color: #f8fafc; -fx-border-color: #cbd5e1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-font-size: 13px;"/>
+                </VBox>
+                
+                <!-- 附加信息 -->
+                <VBox spacing="6">
+                    <Label text="附加信息 (可選)" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                    <TextField fx:id="extraField" promptText="例如: 用戶ID, 訂單號, IP地址等"
+                               style="-fx-background-color: #f8fafc; -fx-border-color: #cbd5e1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10;"/>
+                </VBox>
+                
+                <!-- 按鈕區域 -->
+                <HBox spacing="10">
+                    <Button fx:id="saveBtn" text="💾 保存日誌" onAction="#saveLog" 
+                            style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand; -fx-padding: 10 20;"/>
+                    <Button fx:id="clearBtn" text="🗑️ 清空表單" onAction="#clearForm"
+                            style="-fx-background-color: #94a3b8; -fx-text-fill: white; -fx-background-radius: 8; -fx-cursor: hand; -fx-padding: 10 20;"/>
+                </HBox>
+            </VBox>
+            
+            <!-- 右側：日誌查看與歷史 -->
+            <VBox spacing="10" style="-fx-background-color: transparent;">
+                
+                <!-- 工具欄 -->
+                <HBox spacing="8" alignment="CENTER_LEFT" 
+                      style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 10 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 6, 0, 0, 2);">
+                    
+                    <Label text="📋 歷史日誌" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #334155;"/>
+                    <Separator orientation="VERTICAL" prefHeight="18"/>
+                    
+                    <TextField fx:id="searchField" promptText="🔍 搜尋日誌..." 
+                               style="-fx-background-color: #f1f5f9; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 6;"
+                               prefWidth="160"/>
+                    
+                    <ComboBox fx:id="filterLevelCombo" promptText="全部級別" prefWidth="100"
+                              style="-fx-background-color: #f1f5f9; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8;">
+                        <items>
+                            <FXCollections fx:factory="observableArrayList">
+                                <String fx:value="全部"/>
+                                <String fx:value="INFO"/>
+                                <String fx:value="WARNING"/>
+                                <String fx:value="ERROR"/>
+                                <String fx:value="DEBUG"/>
+                            </FXCollections>
+                        </items>
+                    </ComboBox>
+                    
+                    <ComboBox fx:id="filterCategoryCombo" promptText="全部分類" prefWidth="110"
+                              style="-fx-background-color: #f1f5f9; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8;"/>
+                    
+                    <Region HBox.hgrow="ALWAYS"/>
+                    
+                    <Button fx:id="refreshHistoryBtn" text="🔄 刷新" onAction="#refreshLogList"
+                            style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 8; -fx-cursor: hand; -fx-padding: 5 12;"/>
+                    <Button fx:id="exportAllBtn" text="📥 匯出" onAction="#exportAllLogs"
+                            style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-background-radius: 8; -fx-cursor: hand; -fx-padding: 5 12;"/>
+                    <Button fx:id="deleteOldBtn" text="🗑️ 清理" onAction="#deleteOldLogs"
+                            style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-background-radius: 8; -fx-cursor: hand; -fx-padding: 5 12;"/>
+                </HBox>
+                
+                <!-- 日誌列表 -->
+                <ListView fx:id="logListView" VBox.vgrow="ALWAYS"
+                          style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 6, 0, 0, 2); -fx-padding: 5;">
+                    <placeholder>
+                        <VBox alignment="CENTER" spacing="10">
+                            <Label text="📭" style="-fx-font-size: 40px;"/>
+                            <Label text="暫無日誌記錄" style="-fx-text-fill: #94a3b8; -fx-font-size: 13px;"/>
+                        </VBox>
+                    </placeholder>
+                </ListView>
+                
+                <!-- 日誌詳情顯示區 -->
+                <VBox style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 6, 0, 0, 2);"
+                      prefHeight="180">
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="📄 日誌詳情" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #334155;"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="deleteBtn" text="刪除" onAction="#deleteSelectedLog"
+                                style="-fx-background-color: transparent; -fx-text-fill: #ef4444; -fx-cursor: hand; -fx-border-color: #ef4444; -fx-border-radius: 6; -fx-padding: 2 10;"/>
+                    </HBox>
+                    <Separator style="-fx-background-color: #e2e8f0; -fx-padding: 5 0 5 0;"/>
+                    <TextArea fx:id="detailArea" editable="false" wrapText="true" VBox.vgrow="ALWAYS"
+                              style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-font-size: 12px;"/>
+                </VBox>
+            </VBox>
+        </SplitPane>
+        
+        <!-- 底部狀態欄 -->
+        <HBox spacing="10" alignment="CENTER_LEFT" 
+              style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 6 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 4, 0, 0, 1);">
+            <Label text="📊" style="-fx-font-size: 12px;"/>
+            <Label fx:id="statsLabel" text="共 0 條日誌" style="-fx-text-fill: #64748b; -fx-font-size: 12px;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="saveStatusLabel" text="" style="-fx-text-fill: #16a34a; -fx-font-size: 12px;"/>
+        </HBox>
+    </VBox>
+</AnchorPane>

@@ -1,0 +1,25 @@
+/* 隐藏滚动条的样式 */
+.hidden-scroll-pane {
+  -fx-background-color: transparent;
+  -fx-background: transparent;
+  -fx-border: none;
+}
+
+.hidden-scroll-pane > .scroll-bar:vertical {
+  -fx-pref-width: 0;
+  -fx-min-width: 0;
+  -fx-max-width: 0;
+  -fx-opacity: 0;
+}
+
+.hidden-scroll-pane > .scroll-bar:vertical .increment-button,
+.hidden-scroll-pane > .scroll-bar:vertical .decrement-button {
+  -fx-pref-height: 0;
+  -fx-min-height: 0;
+  -fx-max-height: 0;
+  -fx-padding: 0;
+}
+
+.hidden-scroll-pane > .viewport {
+  -fx-background-color: transparent;
+}

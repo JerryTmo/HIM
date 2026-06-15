@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.Region?>
+
+<AnchorPane prefWidth="1000" prefHeight="600" style="-fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #1e88e5 0%, #0d47a1 100%);" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.controller.LoginController">
+    
+    <!-- 背景装饰元素 -->
+    <Circle radius="200" fill="rgba(255,255,255,0.05)" layoutX="800" layoutY="-50" />
+    <Circle radius="150" fill="rgba(255,255,255,0.03)" layoutX="-50" layoutY="500" />
+    <Circle radius="100" fill="rgba(255,255,255,0.02)" layoutX="200" layoutY="550" />
+    
+    <!-- 主容器：水平布局，左側品牌展示，右側登錄表單 -->
+    <HBox spacing="0" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0" style="-fx-background-color: transparent;">
+        
+        <!-- ===== 左側品牌展示區域 ===== -->
+        <VBox spacing="30" alignment="CENTER" HBox.hgrow="ALWAYS" prefWidth="500" style="-fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #1565c0 0%, #0d47a1 100%); -fx-padding: 60 40;">
+            
+            <!-- Logo 和品牌名稱 -->
+            <VBox spacing="15" alignment="CENTER">
+                <StackPane prefHeight="100" prefWidth="100" style="-fx-background-color: white; -fx-background-radius: 30; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 20, 0, 0, 10);">
+                    <Label text="🏥" style="-fx-font-size: 50; -fx-text-fill: #1565c0;" />
+                </StackPane>
+                <Label text="医院医疗管理系统" style="-fx-font-size: 32; -fx-font-weight: bold; -fx-text-fill: white; -fx-font-family: 'Microsoft YaHei';" />
+                <Label text="Hospital Management System" style="-fx-font-size: 16; -fx-text-fill: rgba(255,255,255,0.9); -fx-font-family: 'Microsoft YaHei';" />
+            </VBox>
+            
+            <!-- 特色介紹 -->
+            <VBox spacing="20" alignment="CENTER_LEFT" style="-fx-padding: 20 0;">
+                <HBox spacing="15" alignment="CENTER_LEFT">
+                    <StackPane prefHeight="35" prefWidth="35" style="-fx-background-color: rgba(255,255,255,0.2); -fx-background-radius: 12;">
+                        <Label text="👥" style="-fx-font-size: 18;" />
+                    </StackPane>
+                    <Label text="患者档案管理" style="-fx-font-size: 16; -fx-text-fill: white; -fx-font-weight: 500;" />
+                </HBox>
+                <HBox spacing="15" alignment="CENTER_LEFT">
+                    <StackPane prefHeight="35" prefWidth="35" style="-fx-background-color: rgba(255,255,255,0.2); -fx-background-radius: 12;">
+                        <Label text="👨‍⚕️" style="-fx-font-size: 18;" />
+                    </StackPane>
+                    <Label text="医生排班管理" style="-fx-font-size: 16; -fx-text-fill: white; -fx-font-weight: 500;" />
+                </HBox>
+                <HBox spacing="15" alignment="CENTER_LEFT">
+                    <StackPane prefHeight="35" prefWidth="35" style="-fx-background-color: rgba(255,255,255,0.2); -fx-background-radius: 12;">
+                        <Label text="📋" style="-fx-font-size: 18;" />
+                    </StackPane>
+                    <Label text="电子病历系统" style="-fx-font-size: 16; -fx-text-fill: white; -fx-font-weight: 500;" />
+                </HBox>
+                <HBox spacing="15" alignment="CENTER_LEFT">
+                    <StackPane prefHeight="35" prefWidth="35" style="-fx-background-color: rgba(255,255,255,0.2); -fx-background-radius: 12;">
+                        <Label text="💊" style="-fx-font-size: 18;" />
+                    </StackPane>
+                    <Label text="药品库存管理" style="-fx-font-size: 16; -fx-text-fill: white; -fx-font-weight: 500;" />
+                </HBox>
+                <HBox spacing="15" alignment="CENTER_LEFT">
+                    <StackPane prefHeight="35" prefWidth="35" style="-fx-background-color: rgba(255,255,255,0.2); -fx-background-radius: 12;">
+                        <Label text="📅" style="-fx-font-size: 18;" />
+                    </StackPane>
+                    <Label text="预约挂号系统" style="-fx-font-size: 16; -fx-text-fill: white; -fx-font-weight: 500;" />
+                </HBox>
+            </VBox>
+        </VBox>
+        
+        <!-- ===== 右側登錄表單區域 ===== -->
+        <VBox spacing="30" alignment="CENTER" HBox.hgrow="ALWAYS" prefWidth="500" style="-fx-background-color: white; -fx-padding: 60 50;">
+            
+            <!-- 表單標題 -->
+            <VBox spacing="5" alignment="CENTER">
+                <Label text="欢迎使用" style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: #333;" />
+                <Label text="请登录您的账户" style="-fx-font-size: 14; -fx-text-fill: #999;" />
+            </VBox>
+            
+            <!-- 登錄表單 -->
+            <VBox spacing="20" prefWidth="320">
+                
+                <!-- 用戶名輸入框 -->
+                <VBox spacing="8">
+                    <Label text="用户名" style="-fx-font-size: 14; -fx-font-weight: 500; -fx-text-fill: #555;" />
+                    <TextField fx:id="usernameField" promptText="请输入用户名或工号" style="-fx-background-color: #f5f5f5; -fx-background-radius: 12; -fx-padding: 12 15; -fx-font-size: 14;">
+                        <padding>
+                            <Insets left="15" right="15" top="12" bottom="12" />
+                        </padding>
+                    </TextField>
+                </VBox>
+                
+                <!-- 密碼輸入框 -->
+                <VBox spacing="8">
+                    <Label text="密码" style="-fx-font-size: 14; -fx-font-weight: 500; -fx-text-fill: #555;" />
+                    <PasswordField fx:id="passwordField" promptText="请输入密码" style="-fx-background-color: #f5f5f5; -fx-background-radius: 12; -fx-padding: 12 15; -fx-font-size: 14;">
+                        <padding>
+                            <Insets left="15" right="15" top="12" bottom="12" />
+                        </padding>
+                    </PasswordField>
+                </VBox>
+                
+                <!-- 記住密碼和忘記密碼 -->
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <HBox spacing="5" alignment="CENTER">
+                        <StackPane prefHeight="18" prefWidth="18" style="-fx-background-color: #f0f0f0; -fx-background-radius: 4;">
+                            <Label text="✓" style="-fx-text-fill: #1e88e5; -fx-font-size: 12;" />
+                        </StackPane>
+                        <Label text="记住密码" style="-fx-font-size: 13; -fx-text-fill: #666;" />
+                    </HBox>
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Hyperlink text="忘记密码？" onAction="#handleForgotPassword" style="-fx-text-fill: #1e88e5; -fx-font-size: 13; -fx-border: none;" />
+                </HBox>
+                
+                <!-- 錯誤提示 -->
+                <Label fx:id="errorLabel" 
+       text="" 
+       style="-fx-text-fill: #ff4444; -fx-font-size: 12;" 
+       wrapText="true"
+       minHeight="20" 
+       prefHeight="20"/>
+                
+                <!-- 登錄按鈕 -->
+                <Button fx:id="loginButton" text="登 录" onAction="#handleLogin" style="-fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #1e88e5 0%, #0d47a1 100%); -fx-text-fill: white; -fx-font-size: 16; -fx-font-weight: bold; -fx-background-radius: 12; -fx-padding: 15 0; -fx-cursor: hand;" prefWidth="320">
+                    <effect>
+                        <javafx.scene.effect.DropShadow color="rgba(30,136,229,0.3)" radius="10" offsetX="0" offsetY="4" />
+                    </effect>
+                </Button>
+                
+                <!-- 分隔線 -->
+                <HBox spacing="10" alignment="CENTER">
+                    <Separator prefWidth="100" />
+                    <Label text="或使用其他方式登录" style="-fx-font-size: 12; -fx-text-fill: #999;" />
+                    <Separator prefWidth="100" />
+                </HBox>
+                
+                <!-- 第三方登錄 -->
+                <HBox spacing="20" alignment="CENTER">
+                    <StackPane prefHeight="45" prefWidth="45" style="-fx-background-color: #e3f2fd; -fx-background-radius: 12; -fx-cursor: hand;">
+                        <Label text="📱" style="-fx-font-size: 20;" />
+                    </StackPane>
+                    <StackPane prefHeight="45" prefWidth="45" style="-fx-background-color: #e3f2fd; -fx-background-radius: 12; -fx-cursor: hand;">
+                        <Label text="💻" style="-fx-font-size: 20;" />
+                    </StackPane>
+                    <StackPane prefHeight="45" prefWidth="45" style="-fx-background-color: #e3f2fd; -fx-background-radius: 12; -fx-cursor: hand;">
+                        <Label text="🔑" style="-fx-font-size: 20;" />
+                    </StackPane>
+                </HBox>
+            </VBox>
+            
+            <!-- 註冊提示 -->
+            <HBox spacing="5" alignment="CENTER">
+                <Label text="还没有账号？" style="-fx-font-size: 14; -fx-text-fill: #666;" />
+                <Hyperlink text="立即注册" onAction="#goToRegister" style="-fx-text-fill: #1e88e5; -fx-font-size: 14; -fx-font-weight: bold; -fx-border: none;" />
+            </HBox>
+            
+            <!-- 底部服務條款 -->
+            <Label text="登录即表示同意《用户协议》和《隐私政策》" style="-fx-font-size: 11; -fx-text-fill: #999; -fx-padding: 20 0 0 0;" />
+        </VBox>
+    </HBox>
+</AnchorPane>

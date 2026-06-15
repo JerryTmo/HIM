@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.Region?>
+
+<AnchorPane prefWidth="1000" prefHeight="800" 
+            style="-fx-background-color: #f5f7fa;" 
+            stylesheets="@../css/photo.css"
+            xmlns="http://javafx.com/javafx/17" 
+            xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="com.example.controller.PhotoController">
+    
+    <VBox spacing="0" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0">
+        
+        <!-- 相册头部 -->
+        <VBox spacing="15" style="-fx-background-color: white; -fx-padding: 20 30; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2);">
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <Label text="📸 我的相册" style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: #1a1a2e;"/>
+                <Region HBox.hgrow="ALWAYS" />
+                <Button fx:id="uploadBtn" text="📤 上传照片" style="-fx-background-color: #6B73FF; -fx-text-fill: white; -fx-background-radius: 25; -fx-padding: 8 20; -fx-font-weight: bold; -fx-cursor: hand;">
+                    <tooltip><Tooltip text="上传新照片" /></tooltip>
+                </Button>
+                <Button fx:id="createAlbumBtn" text="📁 创建相册" style="-fx-background-color: transparent; -fx-border-color: #6B73FF; -fx-border-radius: 25; -fx-text-fill: #6B73FF; -fx-background-radius: 25; -fx-padding: 8 20; -fx-cursor: hand;">
+                    <tooltip><Tooltip text="创建新相册" /></tooltip>
+                </Button>
+            </HBox>
+            
+            <!-- 统计信息和筛选栏 -->
+            <HBox spacing="20" alignment="CENTER_LEFT">
+                <HBox spacing="5" alignment="CENTER">
+                    <Label text="📷" style="-fx-font-size: 18;"/>
+                    <Label fx:id="photoCountLabel" text="0张照片" style="-fx-text-fill: #666; -fx-font-size: 13;"/>
+                </HBox>
+                <Separator orientation="VERTICAL" prefHeight="20" />
+                <HBox spacing="5" alignment="CENTER">
+                    <Label text="📁" style="-fx-font-size: 18;"/>
+                    <Label fx:id="albumCountLabel" text="0个相册" style="-fx-text-fill: #666; -fx-font-size: 13;"/>
+                </HBox>
+                <Region HBox.hgrow="ALWAYS" />
+                <HBox spacing="10" alignment="CENTER">
+                    <Label text="排序:" style="-fx-text-fill: #666; -fx-font-size: 12;"/>
+                    <ComboBox fx:id="sortComboBox" style="-fx-background-radius: 15; -fx-padding: 3 10;"/>
+                    <TextField fx:id="searchField" promptText="🔍 搜索照片..." style="-fx-background-radius: 20; -fx-padding: 5 15; -fx-background-color: #f0f2f5; -fx-border: none;" prefWidth="200"/>
+                </HBox>
+            </HBox>
+        </VBox>
+        
+        <!-- 相册标签页 -->
+        <HBox spacing="20" style="-fx-padding: 15 30 0 30; -fx-background-color: white;">
+            <Button fx:id="albumTabBtn" text="📁 相册视图" style="-fx-background-color: transparent; -fx-text-fill: #6B73FF; -fx-font-weight: bold; -fx-padding: 10 0; -fx-border-color: #6B73FF; -fx-border-width: 0 0 2 0; -fx-cursor: hand;">
+                <tooltip><Tooltip text="按相册分组查看" /></tooltip>
+            </Button>
+            <Button fx:id="gridTabBtn" text="🖼️ 网格视图" style="-fx-background-color: transparent; -fx-text-fill: #666; -fx-padding: 10 0; -fx-cursor: hand;">
+                <tooltip><Tooltip text="网格形式展示所有照片" /></tooltip>
+            </Button>
+            <Region HBox.hgrow="ALWAYS" />
+        </HBox>
+        
+        <!-- 主要内容区域 - 相册视图 -->
+        <ScrollPane fx:id="albumScrollPane" 
+                    styleClass="hidden-scroll-pane"
+                    fitToWidth="true" 
+                    hbarPolicy="NEVER" 
+                    vbarPolicy="AS_NEEDED">
+            <VBox spacing="25" style="-fx-padding: 20 30 30 30;">
+                <FlowPane fx:id="albumContainer" hgap="20" vgap="20" alignment="TOP_LEFT" prefWrapLength="940" />
+            </VBox>
+        </ScrollPane>
+        
+        <!-- 主要内容区域 - 网格视图 -->
+        <ScrollPane fx:id="gridScrollPane" 
+                    styleClass="hidden-scroll-pane"
+                    fitToWidth="true" 
+                    hbarPolicy="NEVER" 
+                    vbarPolicy="AS_NEEDED"
+                    visible="false" managed="false">
+            <VBox spacing="20" style="-fx-padding: 20 30 30 30;">
+                <FlowPane fx:id="photoContainer" hgap="15" vgap="15" alignment="TOP_LEFT" prefWrapLength="940" />
+            </VBox>
+        </ScrollPane>
+        
+        <!-- 加载指示器 -->
+        <VBox fx:id="loadingContainer" alignment="CENTER" spacing="15" style="-fx-padding: 50;" visible="false" managed="false">
+            <ProgressIndicator prefWidth="40" prefHeight="40" style="-fx-progress-color: #6B73FF;" />
+            <Label text="加载中..." style="-fx-text-fill: #999; -fx-font-size: 14;"/>
+        </VBox>
+        
+        <!-- 空状态提示 -->
+        <VBox fx:id="emptyContainer" alignment="CENTER" spacing="20" style="-fx-padding: 80;" visible="false" managed="false">
+            <Label text="📸" style="-fx-font-size: 80; -fx-opacity: 0.5;"/>
+            <Label text="暂无照片" style="-fx-font-size: 18; -fx-text-fill: #999; -fx-font-weight: bold;"/>
+            <Label text="点击上传按钮，分享你的精彩瞬间" style="-fx-font-size: 14; -fx-text-fill: #ccc;"/>
+            <Button fx:id="emptyUploadBtn" text="上传第一张照片" style="-fx-background-color: #6B73FF; -fx-text-fill: white; -fx-background-radius: 25; -fx-padding: 10 25; -fx-cursor: hand;"/>
+        </VBox>
+        
+    </VBox>
+    
+</AnchorPane>
