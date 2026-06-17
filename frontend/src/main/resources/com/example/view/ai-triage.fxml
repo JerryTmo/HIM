@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.controller.AITriageController"
+            style="-fx-background-color: #f5f6fa;">
+
+    <VBox spacing="0" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+          AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+
+        <!-- 顶部标题栏 -->
+        <HBox alignment="CENTER_LEFT" spacing="12"
+              style="-fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 5, 0, 0, 2);">
+            <padding>
+                <Insets top="15" right="25" bottom="15" left="25"/>
+            </padding>
+            <Label text="🔍" style="-fx-font-size: 28px;"/>
+            <VBox>
+                <Label text="智能导诊" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2d3436;"/>
+                <Label text="描述症状，AI 推荐就诊科室" style="-fx-font-size: 12px; -fx-text-fill: #b2bec3;"/>
+            </VBox>
+        </HBox>
+
+        <!-- 主内容 -->
+        <ScrollPane VBox.vgrow="ALWAYS"
+                    style="-fx-background: transparent; -fx-background-color: transparent;">
+            <VBox spacing="20" style="-fx-padding: 25;">
+
+                <!-- 输入区域 -->
+                <VBox spacing="12"
+                      style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);">
+                    <Label text="📝 描述症状" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #2d3436;"/>
+                    <TextArea fx:id="symptomsArea" promptText="请详细描述您的症状，例如：头痛三天、发烧38.5度、伴有咳嗽..."
+                              style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-padding: 12; -fx-font-size: 14px;"
+                              wrapText="true" prefRowCount="5"/>
+
+                    <HBox spacing="15">
+                        <VBox spacing="5" HBox.hgrow="ALWAYS">
+                            <Label text="年龄" style="-fx-font-size: 12px; -fx-text-fill: #636e72;"/>
+                            <TextField fx:id="ageField" promptText="如: 35"
+                                       style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-padding: 8 12;"/>
+                        </VBox>
+                        <VBox spacing="5" HBox.hgrow="ALWAYS">
+                            <Label text="性别" style="-fx-font-size: 12px; -fx-text-fill: #636e72;"/>
+                            <ComboBox fx:id="genderBox" style="-fx-background-radius: 10; -fx-border-radius: 10;"
+                                      prefHeight="36"/>
+                        </VBox>
+                    </HBox>
+
+                    <Button fx:id="triageBtn" text="🔍 开始导诊" onAction="#handleTriage"
+                            style="-fx-background-color: #6c5ce7; -fx-text-fill: white; -fx-background-radius: 22; -fx-cursor: hand; -fx-padding: 12; -fx-font-size: 15px; -fx-font-weight: bold;"
+                            HBox.hgrow="ALWAYS"/>
+                </VBox>
+
+                <!-- 结果区域（初始隐藏） -->
+                <VBox fx:id="resultBox" visible="false" managed="false" spacing="15"
+                      style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);">
+                    <Label text="🏥 导诊结果" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #2d3436;"/>
+
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="建议科室:" style="-fx-font-size: 14px; -fx-text-fill: #636e72;"/>
+                        <Label fx:id="deptLabel"
+                               style="-fx-background-color: #dfe6e9; -fx-background-radius: 12; -fx-padding: 6 16; -fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2d3436;"/>
+                    </HBox>
+
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="就诊 urgency:" style="-fx-font-size: 14px; -fx-text-fill: #636e72;"/>
+                        <Label fx:id="urgencyLabel"
+                               style="-fx-background-radius: 12; -fx-padding: 6 16; -fx-font-size: 14px; -fx-font-weight: bold;"/>
+                    </HBox>
+
+                    <Separator/>
+
+                    <Label text="📋 分析说明" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #2d3436;"/>
+                    <Label fx:id="descLabel" wrapText="true"
+                           style="-fx-font-size: 13px; -fx-text-fill: #636e72; -fx-line-spacing: 5;"/>
+
+                    <Label text="💡 医生建议" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #2d3436;"/>
+                    <Label fx:id="suggestionLabel" wrapText="true"
+                           style="-fx-font-size: 13px; -fx-text-fill: #636e72;"/>
+                </VBox>
+
+                <!-- 加载指示 -->
+                <VBox fx:id="loadingBox" visible="false" managed="false" alignment="CENTER" spacing="10">
+                    <ProgressIndicator style="-fx-max-width: 40; -fx-max-height: 40;"/>
+                    <Label text="AI 正在分析症状..." style="-fx-font-size: 13px; -fx-text-fill: #b2bec3;"/>
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </VBox>
+</AnchorPane>
