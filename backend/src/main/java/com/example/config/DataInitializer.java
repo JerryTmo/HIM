@@ -96,7 +96,22 @@ public class DataInitializer implements CommandLineRunner {
                 createPermission("查看药品", "medicine:read", "药品管理", "查看药品信息的权限"),
                 createPermission("创建药品", "medicine:create", "药品管理", "创建新药品的权限"),
                 createPermission("更新药品", "medicine:update", "药品管理", "更新药品信息的权限"),
-                createPermission("删除药品", "medicine:delete", "药品管理", "删除药品的权限")
+                createPermission("删除药品", "medicine:delete", "药品管理", "删除药品的权限"),
+
+                // 菜单管理权限
+                createPermission("查看菜单", "menu:read", "菜单管理", "查看菜单信息的权限"),
+                createPermission("创建菜单", "menu:create", "菜单管理", "创建新菜单的权限"),
+                createPermission("更新菜单", "menu:update", "菜单管理", "更新菜单信息的权限"),
+                createPermission("删除菜单", "menu:delete", "菜单管理", "删除菜单的权限"),
+
+                // 系统管理权限
+                createPermission("查看系统设置", "system:read", "系统管理", "查看系统设置的权限"),
+                createPermission("更新系统设置", "system:update", "系统管理", "更新系统设置的权限"),
+
+                // AI 助手权限
+                createPermission("AI 对话", "ai:chat", "AI助手", "使用AI对话功能的权限"),
+                createPermission("AI 思维导图", "ai:mindmap", "AI助手", "使用AI生成思维导图的权限"),
+                createPermission("AI 智能导诊", "ai:triage", "AI助手", "使用AI智能导诊的权限")
         );
 
         permissionRepository.saveAll(permissions);
@@ -202,8 +217,7 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     /**
-     * 初始化菜单数据
-     * 关联到已有权限模块，按角色权限动态展示
+     * 初始化菜单数据 — 完整的多级菜单体系
      */
     private void initializeMenus() {
         if (menuRepository.count() > 0) {
@@ -211,55 +225,90 @@ public class DataInitializer implements CommandLineRunner {
             return;
         }
 
-        // 1. 创建一级分类菜单（无 route，作为分组标题）
-        MenuEntity patientMgmt = createMenu("患者管理", null, "🏥", 1, "患者管理", null);
-        MenuEntity doctorMgmt = createMenu("医生管理", null, "👨‍⚕️", 2, "医生管理", null);
-        MenuEntity appointmentMgmt = createMenu("预约管理", null, "📅", 3, "预约管理", null);
-        MenuEntity medicalMgmt = createMenu("病历管理", null, "📝", 4, "病历管理", null);
-        MenuEntity medicineMgmt = createMenu("药品管理", null, "💊", 5, "药品管理", null);
+        // ========== 一级分组菜单 ==========
+        MenuEntity patientGroup   = createMenu("患者管理",  null, "🏥",  1, "患者管理", null);
+        MenuEntity doctorGroup    = createMenu("医生管理",  null, "👨‍⚕️", 2, "医生管理", null);
+        MenuEntity appointGroup   = createMenu("预约管理",  null, "📅",  3, "预约管理", null);
+        MenuEntity medicalGroup   = createMenu("病历管理",  null, "📝",  4, "病历管理", null);
+        MenuEntity medicineGroup  = createMenu("药品管理",  null, "💊",  5, "药品管理", null);
+        MenuEntity albumGroup     = createMenu("相册管理",  null, "📸",  6, "相册管理", null);
+        MenuEntity aiGroup        = createMenu("AI 助手",   null, "🤖",  7, "AI助手",   null);
+        MenuEntity systemGroup    = createMenu("系统管理",  null, "⚙️",  8, "系统管理", null);
 
-        menuRepository.saveAll(List.of(patientMgmt, doctorMgmt, appointmentMgmt, medicalMgmt, medicineMgmt));
+        menuRepository.saveAll(List.of(
+                patientGroup, doctorGroup, appointGroup, medicalGroup,
+                medicineGroup, albumGroup, aiGroup, systemGroup
+        ));
 
-        // 2. 创建二级子菜单（有 route，指向 FXML 文件）
-        MenuEntity patientList = createMenu("患者列表", "patient-management", "👥", 1, "患者管理", patientMgmt);
-        MenuEntity patientAdd = createMenu("添加患者", "patient-management", "➕", 2, "患者管理", patientMgmt);
+        // ========== 二级子菜单 ==========
+        // 患者管理
+        MenuEntity patientList  = createMenu("患者列表", "patient-management",      "👥", 1, "患者管理", patientGroup);
+        MenuEntity patientAdd   = createMenu("添加患者", "patient-management",      "➕", 2, "患者管理", patientGroup);
 
-        MenuEntity doctorList = createMenu("医生排班", "doctor-schedule", "📋", 1, "医生管理", doctorMgmt);
+        // 医生管理
+        MenuEntity doctorList   = createMenu("医生排班", "doctor-schedule",         "📋", 1, "医生管理", doctorGroup);
 
-        MenuEntity appointmentList = createMenu("预约列表", "appointment-management", "📋", 1, "预约管理", appointmentMgmt);
-        MenuEntity appointmentAdd = createMenu("新建预约", "appointment-management", "➕", 2, "预约管理", appointmentMgmt);
+        // 预约管理
+        MenuEntity apptList     = createMenu("预约列表", "appointment-management",  "📋", 1, "预约管理", appointGroup);
+        MenuEntity apptAdd      = createMenu("新建预约", "appointment-management",  "➕", 2, "预约管理", appointGroup);
 
-        MenuEntity medicalRecordList = createMenu("病历列表", "medical-record", "📋", 1, "病历管理", medicalMgmt);
-        MenuEntity medicalRecordAdd = createMenu("新建病历", "medical-record", "➕", 2, "病历管理", medicalMgmt);
+        // 病历管理
+        MenuEntity mrList       = createMenu("病历列表", "medical-record",          "📋", 1, "病历管理", medicalGroup);
+        MenuEntity mrAdd        = createMenu("新建病历", "medical-record",          "➕", 2, "病历管理", medicalGroup);
 
-        MenuEntity medicineList = createMenu("药品列表", "medicine-management", "📋", 1, "药品管理", medicineMgmt);
+        // 药品管理
+        MenuEntity medList      = createMenu("药品列表", "medicine-management",     "📋", 1, "药品管理", medicineGroup);
+
+        // 相册管理
+        MenuEntity albumPage    = createMenu("我的相册", "photo",                   "🖼️", 1, "相册管理", albumGroup);
+
+        // 系统管理
+        MenuEntity menuMgmt     = createMenu("菜单管理", "menu-management",         "📂", 1, "菜单管理", systemGroup);
+
+        // AI 助手
+        MenuEntity aiChat      = createMenu("AI 对话",      "ai-chat",    "💬", 1, "AI助手", aiGroup);
+        MenuEntity aiMindMap   = createMenu("思维导图",      "quicklyGenerate", "🧠", 2, "AI助手", aiGroup);
+        MenuEntity aiTriage    = createMenu("智能导诊",      "ai-triage",  "🔍", 3, "AI助手", aiGroup);
 
         menuRepository.saveAll(List.of(
                 patientList, patientAdd,
                 doctorList,
-                appointmentList, appointmentAdd,
-                medicalRecordList, medicalRecordAdd,
-                medicineList
+                apptList, apptAdd,
+                mrList, mrAdd,
+                medList,
+                albumPage,
+                aiChat, aiMindMap, aiTriage,
+                menuMgmt
         ));
 
-        // 3. 关联菜单到对应模块的权限
-        associateMenuWithPermissions(patientMgmt, "患者管理");
+        // ========== 关联权限 ==========
+        associateMenuWithPermissions(patientGroup, "患者管理");
         associateMenuWithPermissions(patientList, "患者管理");
         associateMenuWithPermissions(patientAdd, "患者管理");
 
-        associateMenuWithPermissions(doctorMgmt, "医生管理");
+        associateMenuWithPermissions(doctorGroup, "医生管理");
         associateMenuWithPermissions(doctorList, "医生管理");
 
-        associateMenuWithPermissions(appointmentMgmt, "预约管理");
-        associateMenuWithPermissions(appointmentList, "预约管理");
-        associateMenuWithPermissions(appointmentAdd, "预约管理");
+        associateMenuWithPermissions(appointGroup, "预约管理");
+        associateMenuWithPermissions(apptList, "预约管理");
+        associateMenuWithPermissions(apptAdd, "预约管理");
 
-        associateMenuWithPermissions(medicalMgmt, "病历管理");
-        associateMenuWithPermissions(medicalRecordList, "病历管理");
-        associateMenuWithPermissions(medicalRecordAdd, "病历管理");
+        associateMenuWithPermissions(medicalGroup, "病历管理");
+        associateMenuWithPermissions(mrList, "病历管理");
+        associateMenuWithPermissions(mrAdd, "病历管理");
 
-        associateMenuWithPermissions(medicineMgmt, "药品管理");
-        associateMenuWithPermissions(medicineList, "药品管理");
+        associateMenuWithPermissions(medicineGroup, "药品管理");
+        associateMenuWithPermissions(medList, "药品管理");
+
+        associateMenuWithPermissions(albumGroup, "相册管理");
+
+        associateMenuWithPermissions(aiGroup, "AI助手");
+        associateMenuWithPermissions(aiChat, "AI助手");
+        associateMenuWithPermissions(aiMindMap, "AI助手");
+        associateMenuWithPermissions(aiTriage, "AI助手");
+
+        associateMenuWithPermissions(systemGroup, "系统管理");
+        associateMenuWithPermissions(menuMgmt, "菜单管理");
 
         log.info("初始化菜单数据成功");
     }

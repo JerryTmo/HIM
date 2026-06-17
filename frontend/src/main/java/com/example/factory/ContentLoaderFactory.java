@@ -4,7 +4,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
-import com.example.service.SystemApiService.MenuDTO;
+import io.swagger.client.model.MenuDTO;
 import com.example.controller.HomeController;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -326,13 +326,4 @@ public class ApiService {
         void onLoading(boolean isLoading);
     }
 
-    public void callAsync(Object callable, Object onSuccess, ApiErrorCallback onError, LoadingCallback onLoading) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'callAsync'");
-    }
-
-    public void callAsync(Object callable, Object onSuccess) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'callAsync'");
-    }
 }

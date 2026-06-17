@@ -16,7 +16,7 @@ package io.swagger.client;
 import java.util.Collection;
 import java.util.Iterator;
 
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-05-07T15:03:46.631816300+08:00[Asia/Taipei]", comments = "Generator version: 7.8.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-06-17T20:51:51.230166200+08:00[Asia/Shanghai]", comments = "Generator version: 7.8.0")
 public class StringUtil {
   /**
    * Check if the given array contains the given value (with case-insensitive comparison).

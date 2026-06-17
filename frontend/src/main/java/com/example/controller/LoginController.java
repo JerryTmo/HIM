@@ -11,7 +11,7 @@ import com.example.App;
 import com.example.exception.ApiServiceException;
 import com.example.menu.AppPage;
 import com.example.service.ApiService;
-import com.example.service.SystemApiService;
+import com.example.util.ModelConverter;
 import com.example.util.UserSession;
 
 import io.swagger.client.api.DefaultApi;
@@ -41,20 +41,10 @@ public class LoginController implements Initializable {
 
     @FXML
     public void initialize(URL location, ResourceBundle resources) {
-
-        // 初始化時清空錯誤信息
         errorLabel.setText("");
 
-        // 添加輸入框監聽，輸入時清除錯誤信息
-        usernameField.textProperty().addListener((obs, old, newVal) -> {
-            errorLabel.setText("");
-        });
-
-        passwordField.textProperty().addListener((obs, old, newVal) -> {
-            errorLabel.setText("");
-        });
-
-        // 設置回車鍵也可以登錄
+        usernameField.textProperty().addListener((obs, old, newVal) -> errorLabel.setText(""));
+        passwordField.textProperty().addListener((obs, old, newVal) -> errorLabel.setText(""));
         passwordField.setOnAction(event -> handleLogin());
     }
 
@@ -65,12 +55,11 @@ public class LoginController implements Initializable {
 
         if (!validateInput(username, password))
             return;
-        // 創建請求對象
+
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.setUsername(username);
         loginRequest.setPassword(password);
 
-        // 調用API
         ApiService.getInstance().callAsync(() -> {
             DefaultApi api = ApiService.getInstance().getApi(DefaultApi.class);
             return api.login(loginRequest);
@@ -85,9 +74,25 @@ public class LoginController implements Initializable {
             String token = result.getData().getAccessToken();
             UserSession.login(token, usernameField.getText(), null, null, null);
 
-            // 获取用户信息
-            SystemApiService.getInstance().getCurrentUserInfo(
-                    userInfo -> App.navigateTo(AppPage.HOME),
+            // 获取用户信息（使用 ApiService + DefaultApi）
+            ApiService.getInstance().callAsync(
+                    () -> {
+                        DefaultApi api = ApiService.getInstance().getApi(DefaultApi.class);
+                        return api.getCurrentUser();
+                    },
+                    userResult -> {
+                        if (userResult.getData() != null) {
+                            var userInfo = userResult.getData();
+                            UserSession.login(
+                                    UserSession.getAuthToken(),
+                                    userInfo.getUsername(),
+                                    userInfo.getId(),
+                                    ModelConverter.extractRoles(userInfo),
+                                    ModelConverter.extractPermissions(userInfo)
+                            );
+                        }
+                        App.navigateTo(AppPage.HOME);
+                    },
                     error -> {
                         // 即使获取用户信息失败也登录成功
                         App.navigateTo(AppPage.HOME);
@@ -126,10 +131,8 @@ public class LoginController implements Initializable {
         return true;
     }
 
-    // 把原來的 showLoading 改成：
     private void showLoading(boolean isLoading) {
         loginButton.setDisable(isLoading);
-        // 如果需要，可以根據 isLoading 做不同處理
         if (!isLoading) {
             errorLabel.setText("");
         }
@@ -141,8 +144,6 @@ public class LoginController implements Initializable {
 
     @FXML
     private void goToRegister() {
-        // 導航到註冊頁面
-        // App.navigateTo(AppPage.REGISTER);
         errorLabel.setText("注册功能开发中");
     }
 

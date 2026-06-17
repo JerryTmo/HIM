@@ -3,9 +3,11 @@ package com.example.controller;
 import com.example.App;
 import com.example.menu.AppPage;
 import com.example.model.Patient;
-import com.example.service.MedicalApiService;
+import com.example.service.ApiService;
 import com.example.util.DialogManager;
+import com.example.util.ModelConverter;
 import com.example.util.UserSession;
+import io.swagger.client.api.DefaultApi;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -55,12 +57,10 @@ public class PatientManagementController {
 
     private ObservableList<Patient> patientList;
     private DialogManager dialogManager;
-    private MedicalApiService medicalApiService;
 
     @FXML
     public void initialize() {
         dialogManager = DialogManager.getInstance();
-        medicalApiService = MedicalApiService.getInstance();
         initializeTable();
         initializeGenderComboBox();
         applyPermissionControl();
@@ -68,18 +68,14 @@ public class PatientManagementController {
     }
 
     private void applyPermissionControl() {
-        // 检查权限并控制按钮的可见性和可用性
         boolean canCreate = UserSession.hasPermission("patient:create");
         boolean canUpdate = UserSession.hasPermission("patient:update");
         boolean canDelete = UserSession.hasPermission("patient:delete");
         boolean canRead = UserSession.hasPermission("patient:read");
 
-        // 设置按钮状态
         addButton.setVisible(canCreate);
         updateButton.setVisible(canUpdate);
         deleteButton.setVisible(canDelete);
-
-        // 如果没有读取权限，可以禁用表格或整个界面
         patientTable.setDisable(!canRead);
     }
 
@@ -100,10 +96,14 @@ public class PatientManagementController {
     }
 
     private void loadPatientsFromServer() {
-        medicalApiService.getAllPatients(
-                patients -> {
+        ApiService.getInstance().callAsync(
+                () -> {
+                    DefaultApi api = ApiService.getInstance().getApi(DefaultApi.class);
+                    return api.getAllPatients();
+                },
+                result -> {
                     patientList.clear();
-                    patientList.addAll(patients);
+                    patientList.addAll(ModelConverter.toPatientList(result.getData()));
                 },
                 error -> {
                     log.error("加载患者列表失败", error);
@@ -114,7 +114,6 @@ public class PatientManagementController {
 
     @FXML
     private void handleAddPatient() {
-        // 双重检查权限
         if (!UserSession.hasPermission("patient:create")) {
             dialogManager.showError(403, "您没有创建患者的权限");
             return;
@@ -129,9 +128,14 @@ public class PatientManagementController {
             patient.setIdCard(idCardField.getText());
             patient.setAddress(addressField.getText());
 
-            medicalApiService.createPatient(patient,
-                    id -> {
-                        patient.setId(id);
+            ApiService.getInstance().callAsync(
+                    () -> {
+                        DefaultApi api = ApiService.getInstance().getApi(DefaultApi.class);
+                        return api.createPatient(ModelConverter.toCreateRequest(patient));
+                    },
+                    result -> {
+                        String newId = result.getData();
+                        patient.setId(newId);
                         patientList.add(patient);
                         clearForm();
                         dialogManager.showInfo("患者信息添加成功！");
@@ -148,7 +152,6 @@ public class PatientManagementController {
 
     @FXML
     private void handleUpdatePatient() {
-        // 双重检查权限
         if (!UserSession.hasPermission("patient:update")) {
             dialogManager.showError(403, "您没有修改患者的权限");
             return;
@@ -167,8 +170,12 @@ public class PatientManagementController {
         selectedPatient.setIdCard(idCardField.getText());
         selectedPatient.setAddress(addressField.getText());
 
-        medicalApiService.updatePatient(selectedPatient,
-                _void -> {
+        ApiService.getInstance().callAsync(
+                () -> {
+                    DefaultApi api = ApiService.getInstance().getApi(DefaultApi.class);
+                    return api.updatePatient(ModelConverter.toUpdateRequest(selectedPatient));
+                },
+                result -> {
                     patientTable.refresh();
                     dialogManager.showInfo("患者信息修改成功！");
                 },
@@ -181,7 +188,6 @@ public class PatientManagementController {
 
     @FXML
     private void handleDeletePatient() {
-        // 双重检查权限
         if (!UserSession.hasPermission("patient:delete")) {
             dialogManager.showError(403, "您没有删除患者的权限");
             return;
@@ -194,8 +200,12 @@ public class PatientManagementController {
         }
 
         if (dialogManager.showConfirm("确认", "确定要删除该患者吗？")) {
-            medicalApiService.deletePatient(selectedPatient.getId(),
-                    _void -> {
+            ApiService.getInstance().callAsync(
+                    () -> {
+                        DefaultApi api = ApiService.getInstance().getApi(DefaultApi.class);
+                        return api.deletePatient(selectedPatient.getId());
+                    },
+                    result -> {
                         patientList.remove(selectedPatient);
                         clearForm();
                         dialogManager.showInfo("患者删除成功！");

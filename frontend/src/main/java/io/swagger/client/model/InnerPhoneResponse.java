@@ -10,6 +10,7 @@
  * Do not edit the class manually.
  */
 
+
 package io.swagger.client.model;
 
 import java.util.Objects;
@@ -48,7 +49,7 @@ import io.swagger.client.JSON;
 /**
  * 返回數據
  */
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-05-07T15:03:46.631816300+08:00[Asia/Taipei]", comments = "Generator version: 7.8.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-06-17T20:51:51.230166200+08:00[Asia/Shanghai]", comments = "Generator version: 7.8.0")
 public class InnerPhoneResponse {
   public static final String SERIALIZED_NAME_ID = "id";
   @SerializedName(SERIALIZED_NAME_ID)
@@ -72,7 +73,7 @@ public class InnerPhoneResponse {
 
   public static final String SERIALIZED_NAME_CREATED_AT = "createdAt";
   @SerializedName(SERIALIZED_NAME_CREATED_AT)
-  private String createdAt;
+  private OffsetDateTime createdAt;
 
   public InnerPhoneResponse() {
   }
@@ -84,7 +85,6 @@ public class InnerPhoneResponse {
 
   /**
    * Get id
-   * 
    * @return id
    */
   @jakarta.annotation.Nullable
@@ -96,6 +96,7 @@ public class InnerPhoneResponse {
     this.id = id;
   }
 
+
   public InnerPhoneResponse title(String title) {
     this.title = title;
     return this;
@@ -103,7 +104,6 @@ public class InnerPhoneResponse {
 
   /**
    * Get title
-   * 
    * @return title
    */
   @jakarta.annotation.Nullable
@@ -115,6 +115,7 @@ public class InnerPhoneResponse {
     this.title = title;
   }
 
+
   public InnerPhoneResponse albumId(String albumId) {
     this.albumId = albumId;
     return this;
@@ -122,7 +123,6 @@ public class InnerPhoneResponse {
 
   /**
    * Get albumId
-   * 
    * @return albumId
    */
   @jakarta.annotation.Nullable
@@ -134,6 +134,7 @@ public class InnerPhoneResponse {
     this.albumId = albumId;
   }
 
+
   public InnerPhoneResponse url(String url) {
     this.url = url;
     return this;
@@ -141,7 +142,6 @@ public class InnerPhoneResponse {
 
   /**
    * Get url
-   * 
    * @return url
    */
   @jakarta.annotation.Nullable
@@ -153,6 +153,7 @@ public class InnerPhoneResponse {
     this.url = url;
   }
 
+
   public InnerPhoneResponse thumbnailUrl(String thumbnailUrl) {
     this.thumbnailUrl = thumbnailUrl;
     return this;
@@ -160,7 +161,6 @@ public class InnerPhoneResponse {
 
   /**
    * Get thumbnailUrl
-   * 
    * @return thumbnailUrl
    */
   @jakarta.annotation.Nullable
@@ -172,24 +172,26 @@ public class InnerPhoneResponse {
     this.thumbnailUrl = thumbnailUrl;
   }
 
-  public InnerPhoneResponse createdAt(String createdAt) {
+
+  public InnerPhoneResponse createdAt(OffsetDateTime createdAt) {
     this.createdAt = createdAt;
     return this;
   }
 
   /**
    * Get createdAt
-   * 
    * @return createdAt
    */
   @jakarta.annotation.Nullable
-  public String getCreatedAt() {
+  public OffsetDateTime getCreatedAt() {
     return createdAt;
   }
 
-  public void setCreatedAt(String createdAt) {
+  public void setCreatedAt(OffsetDateTime createdAt) {
     this.createdAt = createdAt;
   }
+
+
 
   @Override
   public boolean equals(Object o) {
@@ -238,6 +240,7 @@ public class InnerPhoneResponse {
     return o.toString().replace("\n", "\n    ");
   }
 
+
   public static HashSet<String> openapiFields;
   public static HashSet<String> openapiRequiredFields;
 
@@ -259,84 +262,66 @@ public class InnerPhoneResponse {
    * Validates the JSON Element and throws an exception if issues found
    *
    * @param jsonElement JSON Element
-   * @throws IOException if the JSON Element is invalid with respect to
-   *                     InnerPhoneResponse
+   * @throws IOException if the JSON Element is invalid with respect to InnerPhoneResponse
    */
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
-    if (jsonElement == null) {
-      if (!InnerPhoneResponse.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-        throw new IllegalArgumentException(
-            String.format("The required field(s) %s in InnerPhoneResponse is not found in the empty JSON string",
-                InnerPhoneResponse.openapiRequiredFields.toString()));
+      if (jsonElement == null) {
+        if (!InnerPhoneResponse.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
+          throw new IllegalArgumentException(String.format("The required field(s) %s in InnerPhoneResponse is not found in the empty JSON string", InnerPhoneResponse.openapiRequiredFields.toString()));
+        }
       }
-    }
 
-    Set<Map.Entry<String, JsonElement>> entries = jsonElement.getAsJsonObject().entrySet();
-    // check to see if the JSON string contains additional fields
-    for (Map.Entry<String, JsonElement> entry : entries) {
-      if (!InnerPhoneResponse.openapiFields.contains(entry.getKey())) {
-        throw new IllegalArgumentException(String.format(
-            "The field `%s` in the JSON string is not defined in the `InnerPhoneResponse` properties. JSON: %s",
-            entry.getKey(), jsonElement.toString()));
+      Set<Map.Entry<String, JsonElement>> entries = jsonElement.getAsJsonObject().entrySet();
+      // check to see if the JSON string contains additional fields
+      for (Map.Entry<String, JsonElement> entry : entries) {
+        if (!InnerPhoneResponse.openapiFields.contains(entry.getKey())) {
+          throw new IllegalArgumentException(String.format("The field `%s` in the JSON string is not defined in the `InnerPhoneResponse` properties. JSON: %s", entry.getKey(), jsonElement.toString()));
+        }
       }
-    }
-    JsonObject jsonObj = jsonElement.getAsJsonObject();
-    if ((jsonObj.get("id") != null && !jsonObj.get("id").isJsonNull()) && !jsonObj.get("id").isJsonPrimitive()) {
-      throw new IllegalArgumentException(
-          String.format("Expected the field `id` to be a primitive type in the JSON string but got `%s`",
-              jsonObj.get("id").toString()));
-    }
-    if ((jsonObj.get("title") != null && !jsonObj.get("title").isJsonNull())
-        && !jsonObj.get("title").isJsonPrimitive()) {
-      throw new IllegalArgumentException(
-          String.format("Expected the field `title` to be a primitive type in the JSON string but got `%s`",
-              jsonObj.get("title").toString()));
-    }
-    if ((jsonObj.get("albumId") != null && !jsonObj.get("albumId").isJsonNull())
-        && !jsonObj.get("albumId").isJsonPrimitive()) {
-      throw new IllegalArgumentException(
-          String.format("Expected the field `albumId` to be a primitive type in the JSON string but got `%s`",
-              jsonObj.get("albumId").toString()));
-    }
-    if ((jsonObj.get("url") != null && !jsonObj.get("url").isJsonNull()) && !jsonObj.get("url").isJsonPrimitive()) {
-      throw new IllegalArgumentException(
-          String.format("Expected the field `url` to be a primitive type in the JSON string but got `%s`",
-              jsonObj.get("url").toString()));
-    }
-    if ((jsonObj.get("thumbnailUrl") != null && !jsonObj.get("thumbnailUrl").isJsonNull())
-        && !jsonObj.get("thumbnailUrl").isJsonPrimitive()) {
-      throw new IllegalArgumentException(
-          String.format("Expected the field `thumbnailUrl` to be a primitive type in the JSON string but got `%s`",
-              jsonObj.get("thumbnailUrl").toString()));
-    }
+        JsonObject jsonObj = jsonElement.getAsJsonObject();
+      if ((jsonObj.get("id") != null && !jsonObj.get("id").isJsonNull()) && !jsonObj.get("id").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format("Expected the field `id` to be a primitive type in the JSON string but got `%s`", jsonObj.get("id").toString()));
+      }
+      if ((jsonObj.get("title") != null && !jsonObj.get("title").isJsonNull()) && !jsonObj.get("title").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format("Expected the field `title` to be a primitive type in the JSON string but got `%s`", jsonObj.get("title").toString()));
+      }
+      if ((jsonObj.get("albumId") != null && !jsonObj.get("albumId").isJsonNull()) && !jsonObj.get("albumId").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format("Expected the field `albumId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("albumId").toString()));
+      }
+      if ((jsonObj.get("url") != null && !jsonObj.get("url").isJsonNull()) && !jsonObj.get("url").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format("Expected the field `url` to be a primitive type in the JSON string but got `%s`", jsonObj.get("url").toString()));
+      }
+      if ((jsonObj.get("thumbnailUrl") != null && !jsonObj.get("thumbnailUrl").isJsonNull()) && !jsonObj.get("thumbnailUrl").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format("Expected the field `thumbnailUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("thumbnailUrl").toString()));
+      }
   }
 
   public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
     @SuppressWarnings("unchecked")
     @Override
     public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
-      if (!InnerPhoneResponse.class.isAssignableFrom(type.getRawType())) {
-        return null; // this class only serializes 'InnerPhoneResponse' and its subtypes
-      }
-      final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
-      final TypeAdapter<InnerPhoneResponse> thisAdapter = gson.getDelegateAdapter(this,
-          TypeToken.get(InnerPhoneResponse.class));
+       if (!InnerPhoneResponse.class.isAssignableFrom(type.getRawType())) {
+         return null; // this class only serializes 'InnerPhoneResponse' and its subtypes
+       }
+       final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
+       final TypeAdapter<InnerPhoneResponse> thisAdapter
+                        = gson.getDelegateAdapter(this, TypeToken.get(InnerPhoneResponse.class));
 
-      return (TypeAdapter<T>) new TypeAdapter<InnerPhoneResponse>() {
-        @Override
-        public void write(JsonWriter out, InnerPhoneResponse value) throws IOException {
-          JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
-          elementAdapter.write(out, obj);
-        }
+       return (TypeAdapter<T>) new TypeAdapter<InnerPhoneResponse>() {
+           @Override
+           public void write(JsonWriter out, InnerPhoneResponse value) throws IOException {
+             JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
+             elementAdapter.write(out, obj);
+           }
 
-        @Override
-        public InnerPhoneResponse read(JsonReader in) throws IOException {
-          JsonElement jsonElement = elementAdapter.read(in);
-          validateJsonElement(jsonElement);
-          return thisAdapter.fromJsonTree(jsonElement);
-        }
+           @Override
+           public InnerPhoneResponse read(JsonReader in) throws IOException {
+             JsonElement jsonElement = elementAdapter.read(in);
+             validateJsonElement(jsonElement);
+             return thisAdapter.fromJsonTree(jsonElement);
+           }
 
-      }.nullSafe();
+       }.nullSafe();
     }
   }
 
@@ -345,8 +330,7 @@ public class InnerPhoneResponse {
    *
    * @param jsonString JSON string
    * @return An instance of InnerPhoneResponse
-   * @throws IOException if the JSON string is invalid with respect to
-   *                     InnerPhoneResponse
+   * @throws IOException if the JSON string is invalid with respect to InnerPhoneResponse
    */
   public static InnerPhoneResponse fromJson(String jsonString) throws IOException {
     return JSON.getGson().fromJson(jsonString, InnerPhoneResponse.class);
@@ -361,3 +345,4 @@ public class InnerPhoneResponse {
     return JSON.getGson().toJson(this);
   }
 }
+

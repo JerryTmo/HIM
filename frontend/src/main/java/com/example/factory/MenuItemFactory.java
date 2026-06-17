@@ -6,7 +6,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
-import com.example.service.SystemApiService.MenuDTO;
+import io.swagger.client.model.MenuDTO;
 import com.example.util.IconUtil;
 
 /**

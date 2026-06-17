@@ -1,7 +1,21 @@
 {
   "permissions": {
     "allow": [
-      "Bash(java *)"
+      "Bash(java *)",
+      "Bash(mvn clean *)",
+      "Read(//usr/**)",
+      "Read(//mnt/**)",
+      "Read(//opt/**)",
+      "Bash(dpkg -l)",
+      "Bash(apt list *)",
+      "Bash(./mvnw clean *)",
+      "Bash(update-alternatives --list java)",
+      "Bash(find / -name \"javac\" -type f)",
+      "Bash(export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64)",
+      "Bash(update-java-alternatives -l)",
+      "Bash(find / -maxdepth 4 -name \"javac\" -type f)",
+      "Bash(find / -maxdepth 4 -name \"java\" -type f)",
+      "Bash(grep -v \"^--$\")"
     ]
   }
 }

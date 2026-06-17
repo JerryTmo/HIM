@@ -1,17 +1,8 @@
 package com.example.service.impl;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.example.common.ServiceResult;
 import com.example.dto.request.MenuRequest;
+import com.example.dto.response.MenuResponse.MenuDTO;
 import com.example.entity.MenuEntity;
 import com.example.entity.PermissionEntity;
 import com.example.entity.RoleEntity;
@@ -22,17 +13,16 @@ import com.example.repository.MenuRepository;
 import com.example.repository.PermissionRepository;
 import com.example.repository.UserRepository;
 import com.example.service.MenuService;
-
-import io.micrometer.common.util.StringUtils;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-@Service
+import java.util.*;
+import java.util.stream.Collectors;
+
 @Slf4j
+@Service
 @RequiredArgsConstructor
 public class MenuServiceImpl implements MenuService {
 
@@ -40,27 +30,131 @@ public class MenuServiceImpl implements MenuService {
     private final MenuRepository menuRepository;
     private final PermissionRepository permissionRepository;
 
+    // ==================== 查询 ====================
+
     @Override
     @Transactional(readOnly = true)
     public ServiceResult<List<MenuDTO>> findByMenu(String username) {
-        UserEntity userEntity = userRepository.findByUsernameWithRolesAndPermissions(username)
+        UserEntity user = userRepository.findByUsernameWithRolesAndPermissions(username)
                 .orElseThrow(() -> new BusinessException(ResultCode.USER_NOT_FOUND));
-        log.info("用戶信息:{}", userEntity);
 
-        Set<MenuEntity> accessMenus = getAccessibleMenus(userEntity);
-
-        List<MenuDTO> menuDTOs = accessMenus.stream()
-                .filter(menu -> menu.getParent() == null)
+        Set<MenuEntity> accessible = getAccessibleMenus(user);
+        List<MenuDTO> tree = accessible.stream()
+                .filter(m -> m.getParent() == null)
                 .sorted(Comparator.comparing(MenuEntity::getSortOrder))
-                .map(menu -> convertToDTO(menu, accessMenus))
+                .map(m -> toTreeDTO(m, accessible))
                 .collect(Collectors.toList());
-        return ServiceResult.success(menuDTOs);
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'findByMenu'");
+        return ServiceResult.success(tree);
     }
 
-    private Set<MenuEntity> getAccessibleMenus(UserEntity userEntity) {
-        return userEntity.getRoles().stream()
+    @Override
+    @Transactional(readOnly = true)
+    public ServiceResult<List<MenuDTO>> findAllMenus() {
+        List<MenuEntity> all = menuRepository.findAllByOrderBySortOrderAsc();
+        Set<String> allIds = all.stream().map(MenuEntity::getId).collect(Collectors.toSet());
+        List<MenuDTO> tree = all.stream()
+                .filter(m -> m.getParent() == null)
+                .sorted(Comparator.comparing(MenuEntity::getSortOrder))
+                .map(m -> toFullDTO(m, allIds))
+                .collect(Collectors.toList());
+        return ServiceResult.success(tree);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ServiceResult<MenuDTO> getMenuById(String id) {
+        MenuEntity menu = menuRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(ResultCode.NOT_FOUND));
+        return ServiceResult.success(toDTO(menu));
+    }
+
+    // ==================== 写入 ====================
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ServiceResult<String> createMenu(MenuRequest req) {
+        if (menuRepository.existsByRoute(req.getRoute())) {
+            return ServiceResult.error("路由已存在: " + req.getRoute());
+        }
+
+        MenuEntity menu = MenuEntity.builder()
+                .title(req.getTitle())
+                .route(req.getRoute())
+                .icon(req.getIcon())
+                .sortOrder(req.getSortOrder())
+                .isActive(req.getIsActive())
+                .module(req.getModule())
+                .build();
+
+        // 关联父菜单
+        if (req.getParentId() != null) {
+            MenuEntity parent = menuRepository.findById(req.getParentId())
+                    .orElseThrow(() -> new BusinessException(ResultCode.NOT_FOUND));
+            menu.setParent(parent);
+        }
+
+        menuRepository.save(menu);
+
+        // 自动关联模块权限
+        associateModulePermissions(menu);
+        return ServiceResult.success(menu.getId());
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ServiceResult<Void> updateMenu(String id, MenuRequest req) {
+        MenuEntity menu = menuRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(ResultCode.NOT_FOUND));
+
+        menu.setTitle(req.getTitle());
+        menu.setRoute(req.getRoute());
+        menu.setIcon(req.getIcon());
+        menu.setSortOrder(req.getSortOrder());
+        menu.setIsActive(req.getIsActive());
+        menu.setModule(req.getModule());
+
+        // 更新父菜单关联
+        if (req.getParentId() != null) {
+            MenuEntity parent = menuRepository.findById(req.getParentId())
+                    .orElseThrow(() -> new BusinessException(ResultCode.NOT_FOUND));
+            menu.setParent(parent);
+        } else {
+            menu.setParent(null);
+        }
+
+        menuRepository.save(menu);
+        return ServiceResult.success();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ServiceResult<Void> deleteMenu(String id) {
+        MenuEntity menu = menuRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(ResultCode.NOT_FOUND));
+
+        // 解除权限关联
+        for (PermissionEntity perm : menu.getPermissions()) {
+            perm.getMenus().remove(menu);
+        }
+        menu.getPermissions().clear();
+
+        // 解除子菜单关联
+        for (MenuEntity child : menu.getChildren()) {
+            child.setParent(null);
+        }
+        menu.getChildren().clear();
+
+        menuRepository.delete(menu);
+        return ServiceResult.success();
+    }
+
+    // ==================== 私有方法 ====================
+
+    /**
+     * 获取用户有权限访问的所有菜单
+     */
+    private Set<MenuEntity> getAccessibleMenus(UserEntity user) {
+        return user.getRoles().stream()
                 .filter(Objects::nonNull)
                 .map(RoleEntity::getPermissions)
                 .filter(Objects::nonNull)
@@ -74,119 +168,73 @@ public class MenuServiceImpl implements MenuService {
                 .collect(Collectors.toSet());
     }
 
-    private MenuDTO convertToDTO(MenuEntity menu, Set<MenuEntity> allAccessibleMenus) {
-        MenuDTO dto = new MenuDTO();
-        dto.setId(menu.getId());
-        dto.setTitle(menu.getTitle());
-        dto.setRoute(menu.getRoute());
-        dto.setIcon(menu.getIcon());
-        dto.setSortOrder(menu.getSortOrder());
-        dto.setModule(menu.getModule());
-
+    /**
+     * 构建菜单树 DTO（按权限过滤子菜单）
+     */
+    private MenuDTO toTreeDTO(MenuEntity menu, Set<MenuEntity> accessible) {
         List<MenuDTO> children = menu.getChildren().stream()
-                .filter(allAccessibleMenus::contains)
+                .filter(accessible::contains)
                 .sorted(Comparator.comparing(MenuEntity::getSortOrder))
-                .map(child -> convertToDTO(child, allAccessibleMenus))
+                .map(child -> toTreeDTO(child, accessible))
                 .collect(Collectors.toList());
 
-        dto.setChildren(children);
+        return MenuDTO.builder()
+                .id(menu.getId())
+                .title(menu.getTitle())
+                .route(menu.getRoute())
+                .icon(menu.getIcon())
+                .sortOrder(menu.getSortOrder())
+                .isActive(menu.getIsActive())
+                .module(menu.getModule())
+                .children(children.isEmpty() ? null : children)
+                .build();
+    }
+
+    /**
+     * 构建完整 DTO（不过滤）
+     */
+    private MenuDTO toFullDTO(MenuEntity menu, Set<String> allIds) {
+        List<MenuDTO> children = menu.getChildren().stream()
+                .filter(c -> allIds.contains(c.getId()))
+                .sorted(Comparator.comparing(MenuEntity::getSortOrder))
+                .map(child -> toFullDTO(child, allIds))
+                .collect(Collectors.toList());
+
+        MenuDTO dto = toDTO(menu);
+        dto.setChildren(children.isEmpty() ? null : children);
         return dto;
     }
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class MenuDTO {
-        private String id;
-        private String title;
-        private String route;
-        private String icon;
-        private Integer sortOrder;
-        private String module;
-        private List<MenuDTO> children;
+    /**
+     * Entity → DTO 基础转换
+     */
+    private MenuDTO toDTO(MenuEntity menu) {
+        return MenuDTO.builder()
+                .id(menu.getId())
+                .title(menu.getTitle())
+                .route(menu.getRoute())
+                .icon(menu.getIcon())
+                .sortOrder(menu.getSortOrder())
+                .isActive(menu.getIsActive())
+                .module(menu.getModule())
+                .parentId(menu.getParent() != null ? menu.getParent().getId() : null)
+                .parentTitle(menu.getParent() != null ? menu.getParent().getTitle() : null)
+                .createdAt(menu.getCreatedAt())
+                .updatedAt(menu.getUpdatedAt())
+                .build();
     }
 
-    @Override
-    public ServiceResult<Integer> insertMenus(MenuRequest menuRequest) {
-        // 檢測是否存在數據
-        if (menuRequest == null) {
-            throw new BusinessException(ResultCode.BAD_REQUEST);
+    /**
+     * 将菜单关联到所属模块的权限
+     */
+    private void associateModulePermissions(MenuEntity menu) {
+        if (menu.getModule() == null) return;
+
+        List<PermissionEntity> perms = permissionRepository.findByModule(menu.getModule());
+        for (PermissionEntity perm : perms) {
+            menu.getPermissions().add(perm);
+            perm.getMenus().add(menu);
         }
-        // 檢查唯一性
-        checkMenuUniqueness(menuRequest);
-
-        // 創建菜單
-        MenuEntity savedMenu = createMenu(menuRequest);
-
-        // 處理權限關聯
-        associatePermissions(savedMenu, menuRequest.getModule());
-
-        return ServiceResult.success(null);
+        menuRepository.save(menu);
     }
-
-    private void associatePermissions(MenuEntity savedMenu, String module) {
-        if (StringUtils.isBlank(module)) {
-            return;
-        }
-        Set<PermissionEntity> permissions = getOrCreatePermissions(module);
-
-        permissions.forEach(permission -> {
-            savedMenu.getPermissions().add(permission);
-            permission.getMenus().add(savedMenu);
-        });
-
-        menuRepository.save(savedMenu);
-    }
-
-    private Set<PermissionEntity> getOrCreatePermissions(String module) {
-        List<PermissionEntity> existingPermissions = permissionRepository.findByModule(module);
-        
-        if (existingPermissions != null && !existingPermissions.isEmpty()) {
-            return new HashSet<>(existingPermissions);
-        }
-
-        // 如果权限不存在，创建基础权限
-        Set<PermissionEntity> newPermissions = new HashSet<>();
-        String[] operations = {"read", "create", "update", "delete"};
-        
-        for (String operation : operations) {
-            PermissionEntity permission = PermissionEntity.builder()
-                    .name(module + " - " + operation)
-                    .code(module + ":" + operation)
-                    .module(module)
-                    .description(module + " module " + operation + " permission")
-                    .build();
-            newPermissions.add(permission);
-        }
-        
-        return new HashSet<>(permissionRepository.saveAll(newPermissions));
-    }
-
-    private MenuEntity createMenu(MenuRequest menuRequest) {
-        // 構建菜單實體
-        MenuEntity.MenuEntityBuilder builder = MenuEntity.builder()
-                .title(menuRequest.getTitle())
-                .route(menuRequest.getRoute())
-                .icon(menuRequest.getIcon())
-                .sortOrder(menuRequest.getSortOrder())
-                .isActive(menuRequest.getIsActive())
-                .module(menuRequest.getModule());
-        // 查詢父菜單
-        if (menuRequest.getParentId() != null && !menuRequest.getParentId().trim().isEmpty()) {
-            MenuEntity parentMenu = menuRepository.findById(menuRequest.getParentId())
-                    .orElseThrow(() -> new BusinessException(ResultCode.NOT_FOUND));
-            builder.parent(parentMenu);
-        }
-        // 保存
-        MenuEntity menuEntity = builder.build();
-        return menuRepository.save(menuEntity);
-    }
-
-    private void checkMenuUniqueness(MenuRequest menuRequest) {
-        if (menuRepository.existsByRoute(menuRequest.getRoute())) {
-            throw new BusinessException(ResultCode.NOT_FOUND);
-        }
-    }
-
 }

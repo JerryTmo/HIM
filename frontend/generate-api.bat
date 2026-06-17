@@ -19,7 +19,7 @@ if "%GENERATOR_CHOICE%"=="1" (
     set CLI_TYPE=swagger
     echo 你選擇了：Swagger Codegen
 ) else if "%GENERATOR_CHOICE%"=="2" (
-    set CLI_JAR=E:\xaingmu\test\javafx-demo\openapi-generator-cli-7.8.0.jar
+    set CLI_JAR=D:\Project\Java\HIM\frontend\openapi-generator-cli-7.8.0.jar
     set CLI_TYPE=openapi
     echo 你選擇了：OpenAPI Generator
 ) else (
@@ -30,9 +30,9 @@ if "%GENERATOR_CHOICE%"=="1" (
 )
 
 :: 共用變數
-SET SWAGGER_FILE=C:\Users\F2851406\Downloads\api-docs.json
-SET TEMP_OUTPUT=E:\xaingmu\test\javafx-demo\temp_generated
-SET TARGET_DIR=E:\xaingmu\test\javafx-demo\src\main\java
+SET SWAGGER_FILE=C:\Users\76569\Downloads\api-docs.json
+SET TEMP_OUTPUT=D:\Project\Java\HIM\frontend\temp_generated
+SET TARGET_DIR=D:\Project\Java\HIM\frontend\src\main\java
 
 echo.
 echo [1/4] 檢查檔案是否存在...

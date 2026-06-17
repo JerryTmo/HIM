@@ -5,10 +5,11 @@ import com.example.cache.MenuCache;
 import com.example.factory.ContentLoaderFactory;
 import com.example.factory.MenuItemFactory;
 import com.example.menu.AppPage;
-import com.example.service.SystemApiService;
-import com.example.service.SystemApiService.MenuDTO;
+import com.example.service.ApiService;
 import com.example.util.DialogManager;
 import com.example.util.UserSession;
+import io.swagger.client.api.DefaultApi;
+import io.swagger.client.model.MenuDTO;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -59,14 +60,17 @@ public class HomeController {
     }
 
     /**
-     * 從後端動態加載菜單
+     * 從後端動態加載菜單 — 使用 ApiService + Swagger DefaultApi
      */
     private void loadDynamicMenus() {
-        SystemApiService.getInstance().getMenus(
-                this::onMenusLoaded,
+        ApiService.getInstance().callAsync(
+                () -> {
+                    DefaultApi api = ApiService.getInstance().getApi(DefaultApi.class);
+                    return api.findByMenu();
+                },
+                result -> onMenusLoaded(result.getData()),
                 error -> {
                     log.error("加載菜單失敗: {}", error.getMessage());
-                    // 如果菜單加載失敗，使用緩存或靜態備用
                     List<MenuDTO> cachedMenus = MenuCache.getInstance().getMenuTree();
                     if (cachedMenus != null && !cachedMenus.isEmpty()) {
                         renderMenus(cachedMenus);
@@ -82,13 +86,8 @@ public class HomeController {
      */
     private void onMenusLoaded(List<MenuDTO> menus) {
         Platform.runLater(() -> {
-            // 緩存菜單
             MenuCache.getInstance().cacheMenuTree(menus);
-
-            // 初始化內容加載器
             contentLoaderFactory = new ContentLoaderFactory(this);
-
-            // 渲染菜單
             renderMenus(menus);
         });
     }
@@ -101,7 +100,6 @@ public class HomeController {
 
         for (MenuDTO menu : menus) {
             if (menu.getChildren() != null && !menu.getChildren().isEmpty()) {
-                // 有子菜單 -> 渲染為分類標題 + 子菜單按鈕
                 Node categoryLabel = menuItemFactory.createCategoryLabel(menu);
                 menuContainer.getChildren().add(categoryLabel);
 
@@ -111,19 +109,17 @@ public class HomeController {
                     menuContainer.getChildren().add(menuButton);
                 }
             } else {
-                // 無子菜單 -> 直接渲染為按鈕
                 Button menuButton = menuItemFactory.createMenuItem(menu, 0);
                 menuButton.setOnAction(e -> handleMenuClick(menu));
                 menuContainer.getChildren().add(menuButton);
             }
         }
 
-        // 更新快捷功能區域（可選：只顯示部分核心菜單）
         updateShortcuts(menus);
     }
 
     /**
-     * 處理菜單點擊 - 根據路由加載內容
+     * 處理菜單點擊
      */
     private void handleMenuClick(MenuDTO menu) {
         if (contentLoaderFactory == null) {
@@ -132,12 +128,7 @@ public class HomeController {
 
         Node content = contentLoaderFactory.loadContent(menu);
         if (content != null) {
-            // 更新快捷按鈕的激活樣式
             updateActiveMenuStyle(menu.getId());
-
-            // 這裡需要設置內容到主區域
-            // 內容會通過 ContentLoaderFactory.loadContent() 返回並由 App 或回調處理
-            // 目前 ContentLoaderFactory 返回 Node，需由 HomeController 將內容放入 content area
         }
     }
 
@@ -169,12 +160,10 @@ public class HomeController {
         if (shortcutContainer == null) return;
 
         shortcutContainer.getChildren().clear();
-        // 只取前幾個菜單作為快捷入口
         menus.stream()
                 .limit(5)
                 .forEach(menu -> {
                     if (menu.getChildren() != null && !menu.getChildren().isEmpty()) {
-                        // 取每個分類的第一個子菜單
                         MenuDTO firstChild = menu.getChildren().get(0);
                         addShortcutButton(firstChild);
                     } else {

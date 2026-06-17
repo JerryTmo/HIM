@@ -176,8 +176,18 @@ public class PhotoController implements Initializable {
      */
     private void loadSampleData() {
         showLoading(true);
-        ApiService.getInstance().callAsync(this::getInitData, this::getLoadData);
-        ApiService.getInstance().callAsync(this::getPhotoApi, this::handlePhotoSuccess);
+        ApiService.getInstance().callAsync(
+                this::getInitData,
+                result -> getLoadData(result),
+                error -> { showLoading(false); log.error("初始化数据加载失败", error); },
+                loading -> {}
+        );
+        ApiService.getInstance().callAsync(
+                this::getPhotoApi,
+                result -> handlePhotoSuccess(result),
+                error -> { showLoading(false); log.error("照片数据加载失败", error); },
+                loading -> {}
+        );
     }
 
     private ServiceResultListGetInitResponse getInitData() throws ApiException {
